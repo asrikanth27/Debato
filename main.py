@@ -1,21 +1,17 @@
-from textblob import TextBlob, Word
-from textblob.wordnet import VERB
-from textblob.np_extractors import ConllExtractor, FastNPExtractor # for noun-phrase chunking
-from textblob.classifiers import NaiveBayesClassifier
-from textblob.sentiments import NaiveBayesAnalyzer, PatternAnalyzer
-import similarity, datamine, extract_info, np_extractor, json, get_relevant, TextAnalyser
-from ast import literal_eval
-from pattern.web import plaintext
+print 'Loading libraries...\n'
+import data_mine, json, get_relevant, TextAnalyser, time
 
-# Uncomment below to create noun_phrases and actually search for related information
+# Text Analysis
 raw_query = raw_input('Enter argument: ')
+print 'Starting text analysis...\n'
 # search_query_array = extract_info.noun_phrases(raw_query)
-search_query = TextAnalyser.queryGenerator(raw_query)
+search_query = TextAnalyser.queryGenerator(raw_query, True)
 print 'Search Query: ', isinstance(search_query, str)
 search_query = str(search_query)
 
 # Mining information
-returned_data = datamine.get_info(search_query)
+print 'Mining information off the web...\n'
+returned_data = data_mine.get_info(search_query)
 index=-1
 for data in returned_data["Result"]:
     index += 1
@@ -25,19 +21,16 @@ for data in returned_data["Result"]:
         data = data.encode('utf-8')
     finally:
         returned_data["Result"][index] = data
-# print '\nMined Data Result: ', returned_data["Result"]
 
+# Storing the mined information
+print 'Done mining, saving changes...\n'
 f = open('info.json', 'w')
-# f1 = open('info_dummy.txt', 'w')
-# f.write(file_write_data)
 json.dump(returned_data["Result"], f)
-# f1.write(file_write_data1)
 f.close()
-# f1.close()
 
-# This part calculates similarity within texts
+# Calculating similarity within texts
+print 'Generating counters...\n'
 f = open('info.json', 'r+')
-# raw_read = f.read()
 json_read = json.load(f)
 f.close()
 
@@ -45,8 +38,23 @@ sentences = json_read
 
 counters = get_relevant.get_array(sentences, raw_query)
 
-print 'Possible counters: '
+response_analyzed_string_array = []
+print 'Search results: \n'
 index = 0
+for sentence in sentences:
+    index += 1
+    print '\n', str(index), ') ', sentence
+
+print 'Possible counters: \n'
+index = 0
+if len(counters)>=3:
+	counter_save = counters[0]
+	counters[0:2] = counters[1:3]
+	counters[2] = counter_save
+else:
+	print '\nProbably you are right! WOW!'
 for line in counters:
     index += 1
     print '\n', str(index), ') ', line
+    # response_analyzed_string_array.append(TextAnalyser.queryGenerator(line.encode('utf-8'), False))
+print '\n\n Done:)'

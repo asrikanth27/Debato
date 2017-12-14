@@ -11,11 +11,11 @@ def replace_all(t, dic):
             break
     return text
 
-def queryGenerator():
+def queryGenerator(raw_input_string):
     #
     #Step 1: Obtain input from the user
     #
-    s = raw_input(">>> ")
+    s = raw_input_string
 
     #
     #Step 2: Convert the sentence into blob and MBSP Sentence objects respectively
@@ -177,5 +177,3 @@ def queryGenerator():
     print "<------------------------------------------->"
 
     return final_query
-
-queryGenerator()

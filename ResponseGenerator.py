@@ -4,9 +4,11 @@ from textblob.sentiments import NaiveBayesAnalyzer, PatternAnalyzer
 import MBSP
 
 #Helper method
-def replace_all(text, dic):
+def replace_all(t, dic):
     for i, j in dic.iteritems():
-        text = text.replace(i, j)
+        text = t.replace(i, j)
+        if not text==t:
+            break
     return text
 
 def queryGenerator():
@@ -59,24 +61,15 @@ def queryGenerator():
             anchors.append(np.anchor)
 
     #
-    #Step 7.1: Build a short relevant query based on available information
-    #
-    #Note:make priority lists for different set of words
-    lines = open('replace_list.csv', 'r').readlines()
-    replace_dict = {}
-    for line in lines:
-        kv = line.split(',')
-        replace_dict[kv[0]] = kv[1]
-    #
-    #Step 7.2: Train the classifier for sentiment data
+    #Step 7.0: Train the classifier for sentiment data
     #
     ###with open('sentiment_training_formatted.csv', 'r') as fp:
     ###    classifier = NaiveBayesClassifier(fp, format='csv')
 
     #
-    #Step 7.3: Classify the user input and record the sentiment
+    #Step 7.1: Classify the user input and record the sentiment
     #
-    def getSentiment(sentence):
+    '''def getSentiment(sentence):
         sentiObj= TextBlob(s, analyzer=NaiveBayesAnalyzer()).sentiment
         pos_ratio = sentiObj.p_pos
         neg_ratio = sentiObj.p_neg
@@ -85,15 +78,8 @@ def queryGenerator():
         else:
             return 'neg'
 
-    input_sentiment = getSentiment(input_string)
-
-    #
-    #Step 7.4: Replace words from the array and record the sentiment
-    #
-    def replace_words(phrase):
-        new_phrase = replace_all(phrase, replace_dict)
-        return new_phrase
-
+    input_sentiment = getSentiment(input_string)'''
+    
     #
     #Step 8: Generate the final query
     #
@@ -101,37 +87,32 @@ def queryGenerator():
         for sbj in subjPhrases:
             if pN not in subjPhrases:
                 query = query+pN+" "
-                print 'pN:'+pN
+                #print 'pN:'+pN
 
     for sbj in subjPhrases:
-        sbj = replace_words(sbj)
         query = query+sbj+" "
-        print 'sbj:'+sbj
+        #print 'sbj:'+sbj
 
     for prd in predPhrases:
-        prd = replace_words(prd)
         query = query+prd+" "
-        print 'prd:'+prd
+        #print 'prd:'+prd
 
     for vr in verbPhrases:
-        vr = replace_words(vr)
         query = query+vr+" "
-        print 'vr:'+vr
+        #print 'vr:'+vr
 
     for anc in anchors:
         anc = anc.string
-        anc = replace_words(anc)
         query = query+anc+" "
-        print 'anc:'+anc
+        #print 'anc:'+anc
 
     for pnp in pnps:
         pnp = pnp.string
-        pnp = replace_words(pnp)
         query = query+pnp+" "
-        print 'pnp:'+pnp
-
+        #print 'pnp:'+pnp
+    
     #
-    #Step 9: Filter query for a,an,the,is
+    #Step 9: Filter query for articles: a,an,the,is
     #
     reps = {' a ':' ', ' an ':' ', ' the ':' ', ' is ':' '}
     query = replace_all(query, reps)
@@ -151,17 +132,48 @@ def queryGenerator():
     for wrd in final_words:
         final_query = final_query+wrd+" "
 
-    #
-    #Step 11: Get the sentiment of the final query
-    #
-    final_query_sentiment = getSentiment(final_query)
 
     #
-    #Step 12: Print out the query
+    #Step 11: Sort the query words in order of the input
+    #
+    index_dict = {}
+    indexes = []
+    for word in TextBlob(final_query).words:
+        index_dict[input_string.index(str(word))] = str(word)
+        indexes.append(input_string.index(str(word)))
+    indexes.sort()
+    final_query = ""
+    for index in indexes:
+        final_query = final_query+index_dict[index]+" "
+
+    #
+    #Step 12.0: Build a dictionary of the replaceable words
+    #
+    #Note:make priority lists for different set of words
+    lines = open('replace_list.csv', 'r').readlines()
+    replace_dict = {}
+    for line in lines:
+        kv = line.split(',')
+        replace_dict[kv[0]] = kv[1][:-2]
+    #
+    #Step 12.1: Replace words from the given phrase
+    #
+    def replace_words(phrase):
+        new_phrase = replace_all(phrase, replace_dict)
+        return new_phrase
+    final_query = replace_words(final_query)
+
+    #
+    #Step 13: Get the sentiment of the final query
+    #
+    '''final_query_sentiment = getSentiment(final_query)'''
+
+    #
+    #Step 14: Print out the query
     #
     print "<------------------------------------------->"
-    print "in:",s,"|sentiment:",input_sentiment
-    print "out:",final_query,"|sentiment:",final_query_sentiment
+    print "in:",s
+    print "out:",final_query
     print "<------------------------------------------->"
 
     return final_query

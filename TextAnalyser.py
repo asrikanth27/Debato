@@ -1,6 +1,4 @@
-from textblob import TextBlob, Sentence, Word
-from textblob.classifiers import NaiveBayesClassifier
-from textblob.sentiments import NaiveBayesAnalyzer, PatternAnalyzer
+from textblob import TextBlob
 import MBSP
 
 #Helper method
@@ -11,7 +9,7 @@ def replace_all(t, dic):
             break
     return text
 
-def queryGenerator(raw_input_string):
+def queryGenerator(raw_input_string, change_sentiment):
     #
     #Step 1: Obtain input from the user
     #
@@ -28,8 +26,8 @@ def queryGenerator(raw_input_string):
     #
     query = ""
     w = []
-    subjPhrases, verbPhrases, predPhrases = [],[],[]
-    pNouns, verbs = [],[]
+    subjPhrases, verbPhrases, predPhrases = [], [], []
+    pNouns, verbs = [], []
     pnps, anchors = [], []
 
     #
@@ -56,9 +54,9 @@ def queryGenerator(raw_input_string):
     #Step 6: Detect the noun phrase and the anchors corresponding to them(Ref:CLIPS docs)
     #
     pnps = clipsSentence.pnp
-    for np in pnps:
-        if np.anchor not in anchors:
-            anchors.append(np.anchor)
+    for item in pnps:
+        if item.anchor not in anchors:
+            anchors.append(item.anchor)
 
     #
     #Step 7.0: Train the classifier for sentiment data
@@ -79,38 +77,38 @@ def queryGenerator(raw_input_string):
             return 'neg'
 
     input_sentiment = getSentiment(input_string)'''
-    
+   
     #
     #Step 8: Generate the final query
     #
-    for pN in pNouns:
+    for pNoun in pNouns:
         for sbj in subjPhrases:
-            if pN not in subjPhrases:
-                query = query+pN+" "
-                #print 'pN:'+pN
+            if pNoun not in subjPhrases:
+                query = query+pNoun+" "
+                print 'pNoun:'+pNoun
 
     for sbj in subjPhrases:
         query = query+sbj+" "
-        #print 'sbj:'+sbj
+        print 'sbj:'+sbj
 
     for prd in predPhrases:
         query = query+prd+" "
-        #print 'prd:'+prd
+        print 'prd:'+prd
 
     for vr in verbPhrases:
         query = query+vr+" "
-        #print 'vr:'+vr
+        print 'vr:'+vr
 
     for anc in anchors:
-        anc = anc.string
+        anc = str(anc)
         query = query+anc+" "
-        #print 'anc:'+anc
+        print 'anc:'+anc
 
     for pnp in pnps:
-        pnp = pnp.string
+        pnp = str(pnp)
         query = query+pnp+" "
-        #print 'pnp:'+pnp
-    
+        print 'pnp:'+pnp
+   
     #
     #Step 9: Filter query for articles: a,an,the,is
     #
@@ -124,8 +122,8 @@ def queryGenerator(raw_input_string):
     wrds = query_blob.words
     final_words = []
     for wrd in wrds:
-        print wrd
-        if wrd not in final_words:
+        #print wrd
+        if str(wrd).lower() not in final_words:
             final_words.append(wrd)
 
     final_query = ""
@@ -139,29 +137,34 @@ def queryGenerator(raw_input_string):
     index_dict = {}
     indexes = []
     for word in TextBlob(final_query).words:
-        index_dict[input_string.index(str(word))] = str(word)
-        indexes.append(input_string.index(str(word)))
+        try:
+            index_dict[input_string.index(str(word))] = str(word)
+            indexes.append(input_string.index(str(word)))
+        except(ValueError):
+            print "Word not in main string:", word
+
     indexes.sort()
     final_query = ""
     for index in indexes:
         final_query = final_query+index_dict[index]+" "
 
-    #
-    #Step 12.0: Build a dictionary of the replaceable words
-    #
-    #Note:make priority lists for different set of words
-    lines = open('replace_list.csv', 'r').readlines()
-    replace_dict = {}
-    for line in lines:
-        kv = line.split(',')
-        replace_dict[kv[0]] = kv[1][:-2]
-    #
-    #Step 12.1: Replace words from the given phrase
-    #
-    def replace_words(phrase):
-        new_phrase = replace_all(phrase, replace_dict)
-        return new_phrase
-    final_query = replace_words(final_query)
+    if change_sentiment:
+        #
+        #Step 12.0: Build a dictionary of the replaceable words
+        #
+        #Note:make priority lists for different set of words
+        lines = open('replace_list.csv', 'r').readlines()
+        replace_dict = {}
+        for line in lines:
+            kv = line.split(',')
+            replace_dict[kv[0]] = kv[1][:-2]
+        #
+        #Step 12.1: Replace words from the given phrase
+        #
+        def replace_words(phrase):
+            new_phrase = replace_all(phrase, replace_dict)
+            return new_phrase
+        final_query = replace_words(final_query)
 
     #
     #Step 13: Get the sentiment of the final query
@@ -172,8 +175,10 @@ def queryGenerator(raw_input_string):
     #Step 14: Print out the query
     #
     print "<------------------------------------------->"
-    print "in:",s
-    print "out:",final_query
+    print "in:", s
+    print "out:", final_query
     print "<------------------------------------------->"
 
     return final_query
+
+

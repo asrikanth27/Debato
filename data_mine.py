@@ -17,10 +17,10 @@ def get_info(search_query):
 	engineArray = [engineGoogle, engineTwitter]
 
 	# Google
-	for i in range(1, 2):
+	for i in range(1, 3):
 		result = result + ([para.text for para in engineGoogle.search(search_query, type=SEARCH, start=i, count=10)])
 	# Twitter
-	for i in range(1, 2):
+	for i in range(1, 3):
 		result = result + ([para.text for para in engineTwitter.search(search_query, type=SEARCH, start=i, count=10)])
 
 	return { "Error": None, "Result": result }

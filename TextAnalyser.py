@@ -188,7 +188,7 @@ def queryGenerator(raw_input_string, change_sentiment):
     print "out:", final_query
     print "<------------------------------------------->"
 
-    return final_query
+    return final_query, False
 
 r,foo = queryGenerator("meaning of modem", True)
 print r

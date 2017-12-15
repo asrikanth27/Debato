@@ -1,4 +1,5 @@
 from textblob import TextBlob
+import MeaningExtractor
 import MBSP
 
 #Helper method
@@ -11,9 +12,17 @@ def replace_all(t, dic):
 
 def queryGenerator(raw_input_string, change_sentiment):
     #
+    #Step 0: Seperate if user is asking for meaning or for a debate response
+    #
+    word, isMeaning = MeaningExtractor.getIfMeaning(str(raw_input_string))
+    if isMeaning:
+        meaning = MeaningExtractor.getMeaning(word)
+        return meaning, True
+
+    #
     #Step 1: Obtain input from the user
     #
-    s = raw_input_string
+    s = str(raw_input_string)
 
     #
     #Step 2: Convert the sentence into blob and MBSP Sentence objects respectively
@@ -181,4 +190,5 @@ def queryGenerator(raw_input_string, change_sentiment):
 
     return final_query
 
-
+r,foo = queryGenerator("meaning of modem", True)
+print r

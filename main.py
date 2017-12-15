@@ -58,62 +58,65 @@ raw_query = raw_input('Enter argument: ')
 conversation = conversation(raw_query)
 print 'Starting text analysis...\n'
 # search_query_array = extract_info.noun_phrases(raw_query)
-search_query = TextAnalyser.queryGenerator(raw_query, True)
+search_query, isMeaning = TextAnalyser.queryGenerator(raw_query, True)
 search_query = str(search_query)
 conversation.addSearchQuery(search_query)
 
-# Mining information
-print 'Mining information off the web...\n'
-returned_data = data_mine.get_info(search_query)
-index=-1
-for data in returned_data["Result"]:
-    index += 1
-    try:
-        data = data.encode('ascii')
-    except (UnicodeEncodeError, UnicodeDecodeError):
-        data = data.encode('utf-8')
-    finally:
-        returned_data["Result"][index] = data
+if not isMeaning:
+    # Mining information
+    print 'Mining information off the web...\n'
+    returned_data = data_mine.get_info(search_query)
+    index=-1
+    for data in returned_data["Result"]:
+        index += 1
+        try:
+            data = data.encode('ascii')
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            data = data.encode('utf-8')
+        finally:
+            returned_data["Result"][index] = data
 
-# Storing the mined information
-print 'Done mining, saving changes...\n'
-conversation.addReturnedResults(returned_data["Result"])
-f = open('info.json', 'w')
-json.dump(returned_data["Result"], f)
-f.close()
+    # Storing the mined information
+    print 'Done mining, saving changes...\n'
+    conversation.addReturnedResults(returned_data["Result"])
+    f = open('info.json', 'w')
+    json.dump(returned_data["Result"], f)
+    f.close()
 
-# Calculating similarity within texts
-print 'Generating counters...\n'
-f = open('info.json', 'r+')
-sentences = json.load(f)
-f.close()
-f = open('previous_results.json', 'r+')
-conversation.addReturnedResults(json.load(f))
-f.close()
+    # Calculating similarity within texts
+    print 'Generating counters...\n'
+    f = open('info.json', 'r+')
+    sentences = json.load(f)
+    f.close()
+    f = open('previous_results.json', 'r+')
+    conversation.addReturnedResults(json.load(f))
+    f.close()
 
-# TODO: combine counters before passing it to get_relevant
-google_range = { 'start': 0, 'end': int(round(len(sentences)/2)) }
-twitter_range = { 'start': int(round(len(sentences)/2)), 'end': len(sentences) }
-previous_results_range = { 'start': 0, 'end': len(conversation.returned_results) }
-counters = get_relevant.get_array(sentences, raw_query, google_range)
-counters = counters + get_relevant.get_array(conversation.returned_results, raw_query, previous_results_range)
-tweets = get_relevant.get_array(sentences, raw_query, twitter_range)
-conversation.addCounters(counters)
-conversation.addTweets(tweets)
+    # TODO: combine counters before passing it to get_relevant
+    google_range = { 'start': 0, 'end': int(round(len(sentences)/2)) }
+    twitter_range = { 'start': int(round(len(sentences)/2)), 'end': len(sentences) }
+    previous_results_range = { 'start': 0, 'end': len(conversation.returned_results) }
+    counters = get_relevant.get_array(sentences, raw_query, google_range)
+    counters = counters + get_relevant.get_array(conversation.returned_results, raw_query, previous_results_range)
+    tweets = get_relevant.get_array(sentences, raw_query, twitter_range)
+    conversation.addCounters(counters)
+    conversation.addTweets(tweets)
 
-response_analyzed_string_array = []
-conversation.printCounters()
+    response_analyzed_string_array = []
+    conversation.printCounters()
 
-f = open('previous_results.json', 'w')
-json.dump(counters, f)
-f.close()
+    f = open('previous_results.json', 'w')
+    json.dump(counters, f)
+    f.close()
 
-'''
-f = open('conversation.pkl', 'w')
-src = StringIO()
-p = pickle.Pickler(src)
-# pickle.dump(conversation, f, pickle.HIGHEST_PROTOCOL)
-f.close()
-'''
+    '''
+    f = open('conversation.pkl', 'w')
+    src = StringIO()
+    p = pickle.Pickler(src)
+    # pickle.dump(conversation, f, pickle.HIGHEST_PROTOCOL)
+    f.close()
+    '''
+else:
+    print search_query
 
 print '\n\nDone:)'

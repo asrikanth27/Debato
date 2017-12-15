@@ -13,19 +13,19 @@ class conversation_class:
 
     def addCounters(self, counters):
         self.counters = self.counters + counters
-        return
+        return False
     def addTweets(self, tweets):
         self.tweets = self.tweets + tweets
-        return
+        return False
     def addPreviousCounters(self, previous_counters):
         self.previous_counters = self.previous_counters + previous_counters
-        return
+        return False
     def addSearchQuery(self, search_query):
         self.search_query = search_query
-        return
+        return False
     def addReturnedResults(self, returned_results):
         self.returned_results = self.returned_results + returned_results
-        return
+        return False
 
     def printReturnedResults(self):
         print '\nSearch Results: \n'
@@ -33,33 +33,35 @@ class conversation_class:
         for sentence in self.returned_results:
             index += 1
             print '\n', str(index), ') ', sentence
-        return
+        return False
     def printCounters(self):
         print 'Counters: \n'
         if len(self.counters)==0:
             print '\nProbably you are right! WOW!'
+            return True
         index = 0
         for line in self.counters:
             index += 1
             print '\n', str(index), ') ', line
             if index==3:
                 break
-        return
+        return False
     def printTweets(self):
         print '\nTweets: \n'
         index = 0
         for line in self.tweets:
             index += 1
             print '\n', str(index), ') ', line
-        return
+        return False
 
-def run():
+def run(take_raw=False):
     # Text Analysis
-    raw_query = raw_input('Enter argument: ')
+    if not take_raw:
+        raw_query = raw_input('Enter argument: ')
     conversation = conversation_class(raw_query)
     print 'Starting text analysis...\n'
     # search_query_array = extract_info.noun_phrases(raw_query)
-    search_query, isMeaning = TextAnalyser.queryGenerator(raw_query, False)
+    search_query, isMeaning = TextAnalyser.queryGenerator(raw_query, not take_raw)
     search_query = str(search_query)
     conversation.addSearchQuery(search_query)
 
@@ -113,7 +115,10 @@ def run():
         conversation.addTweets(tweets)
 
         response_analyzed_string_array = []
-        conversation.printCounters()
+        rerun = conversation.printCounters()
+        if rerun:
+            run(conversation.user_argument)
+            return
 
         f = open('previous_results.json', 'w')
         if len(counters) > 3:

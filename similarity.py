@@ -1,3 +1,4 @@
+#! https://gist.github.com/shlomibabluki/5539628
 from nltk import word_tokenize, pos_tag
 from nltk.corpus import wordnet as wn
  

@@ -188,6 +188,4 @@ def queryGenerator(raw_input_string, change_sentiment):
     print "<------------------------------------------->"
 
     return final_query, False
-
-queryGenerator("Marijuana should be allowed as a legal medicine", True)
-
+    

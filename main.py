@@ -4,67 +4,71 @@ import data_mine, json, get_relevant, TextAnalyser, time
 # Text Analysis
 raw_query = raw_input('Enter argument: ')
 print 'Starting text analysis...\n'
-# search_query_array = extract_info.noun_phrases(raw_query)
-search_query = TextAnalyser.queryGenerator(raw_query, True)
-print 'Search Query: ', isinstance(search_query, str)
-search_query = str(search_query)
+search_query, isMeaning = TextAnalyser.queryGenerator(raw_query, True)
 
-# Mining information
-print 'Mining information off the web...\n'
-returned_data = data_mine.get_info(search_query)
-index=-1
-for data in returned_data["Result"]:
-    index += 1
-    try:
-        data = data.encode('ascii')
-    except (UnicodeEncodeError, UnicodeDecodeError):
-        data = data.encode('utf-8')
-    finally:
-        returned_data["Result"][index] = data
+if not isMeaning:
+    print 'Search Query: ', isinstance(search_query, str)
+    search_query = str(search_query)
 
-# Storing the mined information
-print 'Done mining, saving changes...\n'
-f = open('info.json', 'w')
-json.dump(returned_data["Result"], f)
-f.close()
+    # Mining information
+    print 'Mining information off the web...\n'
+    returned_data = data_mine.get_info(search_query)
+    index=-1
+    for data in returned_data["Result"]:
+        index += 1
+        try:
+            data = data.encode('ascii')
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            data = data.encode('utf-8')
+        finally:
+            returned_data["Result"][index] = data
 
-# Calculating similarity within texts
-print 'Generating counters...\n'
-f = open('info.json', 'r+')
-json_read = json.load(f)
-f.close()
+    # Storing the mined information
+    print 'Done mining, saving changes...\n'
+    f = open('info.json', 'w')
+    json.dump(returned_data["Result"], f)
+    f.close()
 
-sentences = json_read
+    # Calculating similarity within texts
+    print 'Generating counters...\n'
+    f = open('info.json', 'r+')
+    json_read = json.load(f)
+    f.close()
 
-google_range = { 'start': 0, 'end': int(round(len(sentences)/2)) }
-twitter_range = { 'start': int(round(len(sentences)/2)), 'end': len(sentences) }
-counters = get_relevant.get_array(sentences, raw_query, google_range)
-tweets = get_relevant.get_array(sentences, raw_query, twitter_range)
+    sentences = json_read
 
-response_analyzed_string_array = []
-print 'Search results: \n'
-index = 0
-for sentence in sentences:
-    index += 1
-    print '\n', str(index), ') ', sentence
+    google_range = { 'start': 0, 'end': int(round(len(sentences)/2)) }
+    twitter_range = { 'start': int(round(len(sentences)/2)), 'end': len(sentences) }
+    counters = get_relevant.get_array(sentences, raw_query, google_range)
+    tweets = get_relevant.get_array(sentences, raw_query, twitter_range)
 
-print 'Possible counters: \n'
-if len(counters)>=3:
-    print '',
-	# counter_save = counters[0]
-	# counters[0:2] = counters[1:3]
-	# counters[2] = counter_save
+    response_analyzed_string_array = []
+    print 'Search results: \n'
+    index = 0
+    for sentence in sentences:
+        index += 1
+        print '\n', str(index), ') ', sentence
+
+    print 'Possible counters: \n'
+    if len(counters)>=3:
+        print '',
+        # counter_save = counters[0]
+        # counters[0:2] = counters[1:3]
+        # counters[2] = counter_save
+    else:
+        print '\nProbably you are right! WOW!'
+    index = 0
+    for line in counters:
+        index += 1
+        print '\n', str(index), ') ', line
+        if index==3:
+            break
+    index = 0
+    for line in tweets:
+        index += 1
+        print '\n', str(index), ') ', line
+
 else:
-	print '\nProbably you are right! WOW!'
-index = 0
-for line in counters:
-    index += 1
-    print '\n', str(index), ') ', line
-    if index==3:
-        break
-index = 0
-for line in tweets:
-    index += 1
-    print '\n', str(index), ') ', line
+    print search_query
 
 print '\n\n Done:)'

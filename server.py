@@ -9,6 +9,7 @@ def hello_world():
 @app.route('/debate', methods=["POST", "GET"])
 def debate():
 	main.run()
+	return 'done'
 
 # app.add_url_rule('/', 'hello', hello_world)
 

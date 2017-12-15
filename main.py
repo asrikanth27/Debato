@@ -59,7 +59,7 @@ def run():
     conversation = conversation_class(raw_query)
     print 'Starting text analysis...\n'
     # search_query_array = extract_info.noun_phrases(raw_query)
-    search_query, isMeaning = TextAnalyser.queryGenerator(raw_query, True)
+    search_query, isMeaning = TextAnalyser.queryGenerator(raw_query, False)
     search_query = str(search_query)
     conversation.addSearchQuery(search_query)
 
@@ -97,9 +97,14 @@ def run():
         google_range = { 'start': 0, 'end': int(round(len(sentences)/2)) }
         twitter_range = { 'start': int(round(len(sentences)/2)), 'end': len(sentences) }
         counters = get_relevant.get_array(sentences, raw_query, google_range)
-        combined = counters + conversation.previous_counters
+        combined = counters
+        for x in conversation.previous_counters:
+            if x not in counters:
+                combined.append(x)
+
+        # combined = counters + conversation.previous_counters
         try:
-            counters = get_relevant.get_array(combined, conversation.user_argument, { 'start': 0, 'end': len(conversation.previous_counters) + len(counters) })
+            counters = get_relevant.get_array(counters, conversation.user_argument, { 'start': 0, 'end': len(conversation.previous_counters) + len(counters) })
         except (UnicodeDecodeError, UnicodeEncodeError):
             combined = [c.encode('utf-8') for c in combined]
             counters = get_relevant.get_array(combined, conversation.user_argument, { 'start': 0, 'end': len(conversation.previous_counters) + len(counters) })

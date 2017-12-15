@@ -1,28 +1,28 @@
-yes,no
-no,yes
-should,should not
-should not,should
-good,bad
-bad,good
-best,worst
-worst,best
-love,hate
-hate,love
-lucky,unlucky
-unlucky,lucky
-safe,dangerous
-dangerous,safe
-better,worse
-worse,better
-rich,poor
-poor,rich
-above,below
-below,above
-excellent,at par
-at par,excellent
-great,small
-small,great
-success,failure
-failure,success
-powerful,weak
-weak,powerful
+yes ,no 
+no ,yes 
+should ,should not 
+should not ,should 
+good ,bad 
+bad ,good 
+best ,worst 
+worst ,best 
+love ,hate 
+hate ,love 
+lucky ,unlucky 
+unlucky ,lucky 
+safe ,dangerous 
+dangerous ,safe 
+better ,worse 
+worse ,better 
+rich ,poor 
+poor ,rich 
+above ,below 
+below ,above 
+excellent ,at par 
+at par , excellent
+great ,s mall
+small,great 
+success ,failure 
+failure ,success 
+powerful ,weak 
+weak ,powerful 

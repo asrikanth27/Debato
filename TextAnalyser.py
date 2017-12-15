@@ -66,7 +66,6 @@ def queryGenerator(raw_input_string, change_sentiment):
     for item in pnps:
         if item.anchor not in anchors:
             anchors.append(item.anchor)
-
     #
     #Step 7.0: Train the classifier for sentiment data
     #
@@ -94,29 +93,29 @@ def queryGenerator(raw_input_string, change_sentiment):
         for sbj in subjPhrases:
             if pNoun not in subjPhrases:
                 query = query+pNoun+" "
-                print 'pNoun:'+pNoun
+                #print 'pNoun:'+pNoun
 
     for sbj in subjPhrases:
         query = query+sbj+" "
-        print 'sbj:'+sbj
+        #print 'sbj:'+sbj
 
     for prd in predPhrases:
         query = query+prd+" "
-        print 'prd:'+prd
+        #print 'prd:'+prd
 
     for vr in verbPhrases:
         query = query+vr+" "
-        print 'vr:'+vr
+        #print 'vr:'+vr
 
     for anc in anchors:
-        anc = str(anc)
+        anc = anc.string
         query = query+anc+" "
-        print 'anc:'+anc
+        #print 'anc:'+anc
 
     for pnp in pnps:
-        pnp = str(pnp)
+        pnp = pnp.string
         query = query+pnp+" "
-        print 'pnp:'+pnp
+        #print 'pnp:'+pnp
    
     #
     #Step 9: Filter query for articles: a,an,the,is
@@ -188,7 +187,7 @@ def queryGenerator(raw_input_string, change_sentiment):
     print "out:", final_query
     print "<------------------------------------------->"
 
-    return final_query
+    return final_query, False
 
-r,foo = queryGenerator("meaning of modem", True)
-print r
+queryGenerator("Marijuana should be allowed as a legal medicine", True)
+

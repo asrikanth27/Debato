@@ -1,11 +1,12 @@
 print 'Loading libraries...\n'
 import data_mine, json, get_relevant, TextAnalyser, time # , pickle
+from pattern.web import plaintext
 from cStringIO import StringIO
 
 class conversation_class:
     def __init__(self, user_argument):
         self.user_argument = user_argument
-        self.returned_results = []
+        self.mined_data = {}
         self.counters = []
         self.tweets = []
         self.previous_counters = []
@@ -23,14 +24,14 @@ class conversation_class:
     def addSearchQuery(self, search_query):
         self.search_query = search_query
         return False
-    def addReturnedResults(self, returned_results):
-        self.returned_results = self.returned_results + returned_results
+    def addReturnedResults(self, mined_data):
+        self.mined_data = mined_data
         return False
 
     def printReturnedResults(self):
         print '\nSearch Results: \n'
         index = 0
-        for sentence in self.returned_results:
+        for sentence in self.mined_data:
             index += 1
             print '\n', str(index), ') ', sentence
         return False
@@ -55,7 +56,7 @@ class conversation_class:
         return False
 
 def run(take_raw=False):
-    # Text Analysis
+    # Text Analysis ----------------------------------------------------------------------------
     if not take_raw:
         raw_query = raw_input('Enter argument: ')
     conversation = conversation_class(raw_query)
@@ -65,66 +66,123 @@ def run(take_raw=False):
     search_query = str(search_query)
     conversation.addSearchQuery(search_query)
 
+    # If user doesn't ask for meaning ----------------------------------------------------------
     if not isMeaning:
-        # Mining information
+        # Mining information -------------------------------------------------------------------
         print 'Mining information off the web...\n'
-        returned_data = data_mine.get_info(search_query)
-        index=-1
-        for data in returned_data["Result"]:
-            index += 1
-            try:
-                data = data.encode('ascii')
-            except (UnicodeEncodeError, UnicodeDecodeError):
-                data = data.encode('utf-8')
-            finally:
-                returned_data["Result"][index] = data
+        mined_data = data_mine.get_info(search_query)
+        if mined_data['Error']:
+            print mined_data['Error']
+            return None
+        # Encode mined data for further use
+        for engine in ['Google', 'Twitter']:
+            index=0
+            for data in mined_data[engine]:
+                try:
+                    data['text'] = data['text'].encode('ascii')
+                    data['url'] = data['url'].encode('ascii')
+                    data['title'] = data['title'].encode('ascii')
+                    # data['url'] = [data_single.encode('ascii') for data_single in data['url']]
+                    # data['title'] = [data_single.encode('ascii') for data_single in data['title']]
+                except (UnicodeEncodeError, UnicodeDecodeError):
+                    data['text'] = data['text'].encode('utf-8')
+                    data['url'] = data['url'].encode('utf-8')
+                    data['title'] = data['title'].encode('utf-8')
+                    # data['text'] = [data_single.encode('utf-8') for data_single in data['text']]
+                    # data['url'] = [data_single.encode('utf-8') for data_single in data['url']]
+                    # data['title'] = [data_single.encode('utf-8') for data_single in data['title']]
+                finally:
+                    mined_data[engine][index] = data
+                index += 1
 
-        # Storing the mined information
-        print 'Done mining, saving changes...\n'
-        conversation.addReturnedResults(returned_data["Result"])
-        f = open('info.json', 'w')
-        json.dump(returned_data["Result"], f)
-        f.close()
+        # Storing the mined information ---------------------------------------------------------
+        print 'Done mining, saving/retrieving changes...\n'
+        conversation.addReturnedResults(mined_data)
+        fG = open('google_results.json', 'w')
+        fT = open('twitter_results.json', 'w')
+        json.dump(mined_data["Google"], fG)
+        json.dump(mined_data["Twitter"], fT)
+        fG.close()
+        fT.close()
 
-        # Calculating similarity within texts
-        print 'Generating counters...\n'
-        f = open('info.json', 'r+')
-        sentences = json.load(f)
-        f.close()
+        # Opening the mined information ---------------------------------------------------------
+        fG = open('google_results.json', 'r+')
+        fT = open('twitter_results.json', 'r+')
+        # sentences = json.load(fG)
+        google_results = json.load(fG)
+        twitter_results = json.load(fT)
+        fG.close()
+        fT.close()
         f = open('previous_results.json', 'r+')
-        conversation.addPreviousCounters(json.load(f))
+        try:
+            conversation.addPreviousCounters(json.load(f))
+        except (ValueError):
+            conversation.addPreviousCounters([])
         f.close()
 
+        # Calculating similarity within texts ---------------------------------------------------
+        print 'Generating counters...\n'
         # TODO: combine counters before passing it to get_relevant
-        google_range = { 'start': 0, 'end': int(round(len(sentences)/2)) }
-        twitter_range = { 'start': int(round(len(sentences)/2)), 'end': len(sentences) }
-        counters = get_relevant.get_array(sentences, raw_query, google_range)
-        combined = counters
+        # counters = get_relevant.get_array(sentences, raw_query, google_range)
         for x in conversation.previous_counters:
-            if x not in counters:
-                combined.append(x)
+            if x not in conversation.mined_data['Google']:
+                conversation.mined_data['Google'].append(x)
 
+        google_range = { 'start': 0, 'end': len(conversation.mined_data['Google']) }
+        twitter_range = { 'start': 0, 'end': len(conversation.mined_data['Twitter']) }
         # combined = counters + conversation.previous_counters
+        # print '\nConversation mined data: ', conversation.mined_data
+        # print '\nMined data: ', mined_data
+        google_text = [iterator['text'] for iterator in conversation.mined_data['Google']]
+        twitter_text = [iterator['text'] for iterator in conversation.mined_data['Twitter']]
+        similarity_threshold = {
+            'Google': 0.6,
+            'Twitter': 0.5
+        }
         try:
-            counters = get_relevant.get_array(counters, conversation.user_argument, { 'start': 0, 'end': len(conversation.previous_counters) + len(counters) })
+            google_counters = get_relevant.get_array(google_text, conversation.user_argument, google_range, similarity_threshold['Google'])
         except (UnicodeDecodeError, UnicodeEncodeError):
-            combined = [c.encode('utf-8') for c in combined]
-            counters = get_relevant.get_array(combined, conversation.user_argument, { 'start': 0, 'end': len(conversation.previous_counters) + len(counters) })
-        tweets = get_relevant.get_array(sentences, raw_query, twitter_range)
-        conversation.addCounters(counters)
-        conversation.addTweets(tweets)
+            print '\nUnicode exception at google_counters(similarity) !, trying utf-8 encoding'
+            google_text = [iterator.encode('utf-8') for iterator in combined]
+            google_counters = get_relevant.get_array(google_text, conversation.user_argument, twitter_range, similarity_threshold['Google'])
+        try:
+            twitter_counters = get_relevant.get_array(twitter_text, conversation.user_argument, google_range, similarity_threshold['Twitter'])
+        except (UnicodeDecodeError, UnicodeEncodeError):
+            print '\nUnicode exception at twtter_counters(similarity) !, trying utf-8 encoding'
+            twitter_text = [iterator.encode('utf-8') for iterator in combined]
+            twitter_counters = get_relevant.get_array(twitter_text, conversation.user_argument, twitter_range, similarity_threshold['Twitter'])
+        # tweets = get_relevant.get_array(sentences, raw_query, twitter_range)
+        conversation.addCounters(google_counters)
+        conversation.addTweets(twitter_counters)
 
         response_analyzed_string_array = []
         rerun = conversation.printCounters()
         if rerun:
+            print '\nRerunning as counters not up to the mark!'
             run(conversation.user_argument)
             return
 
         f = open('previous_results.json', 'w')
-        if len(counters) > 3:
-            json.dump(counters[0:3], f)
+        if len(google_counters) > 3:
+            google_counters_array = []
+            index = 0
+            for google in conversation.mined_data['Google']:
+                for counter_text in google_counters:
+                    if plaintext(google['text']).encode('utf-8') ==  counter_text:
+                        google_counters_array.append(google)
+                        index += 1
+                    if index>=3:
+                        break
+
+            json.dump(google_counters_array, f)
         else:
-            json.dump(counters, f)
+            google_counters_array = []
+            for google in conversation.mined_data['Google']:
+                for counter_text in google_counters:
+                    if plaintext(google['text']).encode('utf-8') ==  counter_text:
+                        google_counters_array.append(google)
+
+            json.dump(google_counters_array, f)
         f.close()
 
         '''

@@ -26,8 +26,10 @@ def new_conn():
 
 try:
 	while 1:
-	    data = conn.recv(100)
+	    data = conn.recv(1024)
+	    string = bytes.decode(data)
 	    print 'Data: ', data
+	    # print 'Lol!!'
 	    if data=='':
 	    	conn.close()
 	    	print 'Waiting for new connection...'
@@ -35,9 +37,9 @@ try:
 	    	# new_conn()
 	    	# raise KeyboardInterrupt
 	    else:
-	    	print 'Hello'
+	    	print 'Recieved from node...'
 	    	main.run(str(data))
-	    	conn.send(data)
+	    	conn.send('Message recieved')
 	conn.close()
 except (KeyboardInterrupt, socket.error):
 	conn.close()

@@ -1,7 +1,8 @@
 print 'Loading libraries...\n'
 import data_mine, json, get_relevant, TextAnalyser, time # , pickle
 from pattern.web import plaintext
-from cStringIO import StringIO
+
+print 'Whenever you are ready ... '
 
 class conversation_class:
     def __init__(self, user_argument):
@@ -55,13 +56,157 @@ class conversation_class:
             print '\n', str(index), ') ', line
         return False
 
-def run(raw_query, change_sentiment=True, recursing=False):
+def check_single_sentence(query):
+    temp = query.split('.')
+    if '' in temp:
+        temp.remove('')
+    return len(temp) < 2
+
+def remove_duplicate(passed_list):
+    unique = []
+    for element in passed_list:
+        if element not in unique:
+            unique.append(element)
+
+    return unique
+    
+def run_multiple(raw_query, change_sentiment=True, recursing=False):
     # Text Analysis ----------------------------------------------------------------------------
     # if not take_raw:
        # raw_query = raw_input('Enter argument: ')
 
+    # raw_query = raw_query.split('.').remove('')
+    print raw_query, ' Multi!!!!!'
+    raw_query = raw_query.split('.')
+    if '' in raw_query:
+        raw_query.remove('')
+
+    multi_mined_data = {
+        'Error': None,
+        'Google': [],
+        'Twitter': []
+    }
+    for sentence in raw_query:
+        mined_data = run(sentence, change_sentiment=change_sentiment, recursing=True, returnall=True)
+        # print 'Within multi: ', counters
+        try:
+            if len(mined_data['Google'])>0 or not len(mined_data['Google'])==None:
+                multi_mined_data['Google'] = multi_mined_data['Google'] + mined_data['Google']
+        except TypeError:
+            print 'Type Error for: ', sentence
+        try:
+            if len(mined_data['Twitter'])>0 or not len(mined_data['Twitter'])==None:
+                multi_mined_data['Twitter'] = multi_mined_data['Twitter'] + mined_data['Twitter']
+        except TypeError:
+            print 'Type Error for: ', sentence    
+
+    conversation_multi = conversation_class(''.join(raw_query))
+    conversation_multi.addReturnedResults(multi_mined_data)
+    raw_query_multi = ''.join(raw_query)
+    if '..' in raw_query_multi:
+        raw_query_multi.remove('..')
+    if '...' in raw_query_multi:
+        raw_query_multi.remove('...')
+    if '....' in raw_query_multi:
+        raw_query_multi.remove('....')
+    if '.....' in raw_query_multi:
+        raw_query_multi.remove('.....')
+    if '......' in raw_query_multi:
+        raw_query_multi.remove('......')
+
+    print '\nRaw query multi: ', raw_query_multi
+    # return 0
+
+    print 'Combining counters...\n'
+    # TODO: combine counters before passing it to get_relevant
+    # counters = get_relevant.get_array(sentences, raw_query, google_range)
+
+    google_range = { 'start': 0, 'end': len(conversation_multi.mined_data['Google']) }
+    twitter_range = { 'start': 0, 'end': len(conversation_multi.mined_data['Twitter']) }
+    google_text = [iterator['text'] for iterator in conversation_multi.mined_data['Google']]
+    twitter_text = [iterator['text'] for iterator in conversation_multi.mined_data['Twitter']]
+    similarity_threshold = {
+        'Google': 0.2,
+        'Twitter': 0.2
+    }
+    try:
+        google_counters = get_relevant.get_array(google_text, conversation_multi.user_argument, google_range, similarity_threshold['Google'])
+    except (UnicodeDecodeError, UnicodeEncodeError):
+        print '\nUnicode exception at google_counters(similarity) !, trying utf-8 encoding'
+        def force_to_unicode(text):
+            return text if isinstance(text, unicode) else text.decode('utf8')
+        google_text = [force_to_unicode(iterator) for iterator in google_text]
+        google_counters = get_relevant.get_array(google_text, conversation_multi.user_argument, google_range, similarity_threshold['Google'])
+    try:
+        twitter_counters = get_relevant.get_array(twitter_text, conversation_multi.user_argument, twitter_range, similarity_threshold['Twitter'])
+    except (UnicodeDecodeError, UnicodeEncodeError):
+        print '\nUnicode exception at twtter_counters(similarity) !, trying utf-8 encoding'
+        def force_to_unicode(text):
+            return text if isinstance(text, unicode) else text.decode('utf8')
+        twitter_text = [force_to_unicode(iterator) for iterator in twitter_text]
+        twitter_counters = get_relevant.get_array(twitter_text, conversation_multi.user_argument, twitter_range, similarity_threshold['Twitter'])
+    conversation_multi.addCounters(google_counters)
+    conversation_multi.addTweets(twitter_counters)
+
+    conversation_multi.counters = remove_duplicate(conversation_multi.counters)
+    google_counters = conversation_multi.counters
+
+    rerun = conversation_multi.printCounters()
+    # if rerun and not recursing:
+        # print '\nRerunning as counters not up to the mark!'
+        # run(conversation.user_argument, change_sentiment=False, recursing=True)   # put return here!
+        # return
+
+    f = open('previous_results.json', 'w')
+    if len(google_counters) > 3:
+        google_counters_array = []
+        index = 0
+        for google in conversation_multi.mined_data['Google']:
+            for counter_text in google_counters:
+                if plaintext(google['text']).encode('utf-8') ==  counter_text:
+                    google_counters_array.append(google)
+                    index += 1
+                if index>=3:
+                    break
+
+        json.dump(google_counters_array, f)
+    else:
+        google_counters_array = []
+        for google in conversation_multi.mined_data['Google']:
+            for counter_text in google_counters:
+                if plaintext(google['text']).encode('utf-8') ==  counter_text:
+                    google_counters_array.append(google)
+
+        json.dump(google_counters_array, f)
+    f.close()
+
+    '''
+    f = open('conversation.pkl', 'w')
+    src = StringIO()
+    p = pickle.Pickler(src)
+    # pickle.dump(conversation, f, pickle.HIGHEST_PROTOCOL)
+    f.close()
+    '''
+
+    print '\n\nDone:)'
+    if len(conversation_multi.counters)<=3:
+        return conversation_multi.counters
+    else:
+        return conversation_multi.counters[0:3]
+
+def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
+    # Text Analysis ----------------------------------------------------------------------------
+    # if not take_raw:
+       # raw_query = raw_input('Enter argument: ')
+
+    print raw_query
+
+    if check_single_sentence(raw_query)==False:
+        return run_multiple(raw_query, change_sentiment=change_sentiment, recursing=recursing)
+    
     conversation = conversation_class(raw_query)
-    print 'Starting text analysis...\n'
+    print 'hello world'
+    print 'Starting text analysis...\n', raw_query
     # search_query_array = extract_info.noun_phrases(raw_query)
     search_query, isMeaning = TextAnalyser.queryGenerator(raw_query, change_sentiment)
     search_query = str(search_query)
@@ -144,27 +289,24 @@ def run(raw_query, change_sentiment=True, recursing=False):
             google_counters = get_relevant.get_array(google_text, conversation.user_argument, google_range, similarity_threshold['Google'])
         except (UnicodeDecodeError, UnicodeEncodeError):
             print '\nUnicode exception at google_counters(similarity) !, trying utf-8 encoding'
-            # for iterator in google_text:
-                # print iterator.decode('utf-8')
             def force_to_unicode(text):
-                # "If text is unicode, it is returned as is. If it's str, convert it to Unicode using UTF-8 encoding"
                 return text if isinstance(text, unicode) else text.decode('utf8')
             google_text = [force_to_unicode(iterator) for iterator in google_text]
-            google_counters = get_relevant.get_array(google_text, conversation.user_argument, twitter_range, similarity_threshold['Google'])
+            google_counters = get_relevant.get_array(google_text, conversation.user_argument, google_range, similarity_threshold['Google'])
         try:
-            twitter_counters = get_relevant.get_array(twitter_text, conversation.user_argument, google_range, similarity_threshold['Twitter'])
+            twitter_counters = get_relevant.get_array(twitter_text, conversation.user_argument, twitter_range, similarity_threshold['Twitter'])
         except (UnicodeDecodeError, UnicodeEncodeError):
             print '\nUnicode exception at twtter_counters(similarity) !, trying utf-8 encoding'
             def force_to_unicode(text):
-                # "If text is unicode, it is returned as is. If it's str, convert it to Unicode using UTF-8 encoding"
                 return text if isinstance(text, unicode) else text.decode('utf8')
             twitter_text = [force_to_unicode(iterator) for iterator in twitter_text]
             twitter_counters = get_relevant.get_array(twitter_text, conversation.user_argument, twitter_range, similarity_threshold['Twitter'])
-        # tweets = get_relevant.get_array(sentences, raw_query, twitter_range)
         conversation.addCounters(google_counters)
         conversation.addTweets(twitter_counters)
 
-        response_analyzed_string_array = []
+        conversation.counters = remove_duplicate(conversation.counters)
+        google_counters = conversation.counters
+
         rerun = conversation.printCounters()
         if rerun and not recursing:
             print '\nRerunning as counters not up to the mark!'
@@ -205,4 +347,10 @@ def run(raw_query, change_sentiment=True, recursing=False):
         print search_query
 
     print '\n\nDone:)'
-    return conversation.counters
+    if returnall==False:
+        if len(conversation.counters)<=3:
+            return conversation.counters
+        else:
+            return conversation.counters[0:3]
+    else:
+        return conversation.mined_data

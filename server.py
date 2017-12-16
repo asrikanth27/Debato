@@ -78,11 +78,17 @@ def debate():
 	index = 0
 	def force_to_unicode(text):
 		return text if isinstance(text, unicode) else text.decode('utf8')
+	# try:		# TODO: check TypeError
 	for para in results:
-		response_query += str(index) + ') ' + para + '\n'# force_to_unicode(para) + '\n'
-		# results[index] = para# force_to_unicode(para)
-		print str(index) + ') ' + para# force_to_unicode(para)
+		try:
+			response_query += str(index) + ') ' + para + '\n'# force_to_unicode(para) + '\n'
+			# results[index] = para# force_to_unicode(para)
+			print str(index) + ') ' + para# force_to_unicode(para)
+		except (TypeError):
+			print 'TypeError in para in results...'
 		index += 1
+	# except (TypeError):
+		# print 'TypeError before para in results...'
 	return json.dumps(results)
 
 

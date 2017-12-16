@@ -127,7 +127,7 @@ def run_multiple(raw_query, change_sentiment=True, recursing=False):
     twitter_text = [iterator['text'] for iterator in conversation_multi.mined_data['Twitter']]
     similarity_threshold = {
         'Google': 0.2,
-        'Twitter': 0.2
+        'Twitter': 0.1
     }
     try:
         google_counters = get_relevant.get_array(google_text, conversation_multi.user_argument, google_range, similarity_threshold['Google'])
@@ -283,7 +283,7 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
         twitter_text = [iterator['text'] for iterator in conversation.mined_data['Twitter']]
         similarity_threshold = {
             'Google': 0.6,
-            'Twitter': 0.5
+            'Twitter': 0.3
         }
         try:
             google_counters = get_relevant.get_array(google_text, conversation.user_argument, google_range, similarity_threshold['Google'])
@@ -349,8 +349,8 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
     print '\n\nDone:)'
     if returnall==False:
         if len(conversation.counters)<=3:
-            return conversation.counters
+            return {'Google': conversation.counters, 'Twitter': conversation.tweets, 'Error': None}
         else:
-            return conversation.counters[0:3]
+            return {'Google': conversation.counters[0:3], 'Twitter': conversation.tweets, 'Error': None}
     else:
         return conversation.mined_data

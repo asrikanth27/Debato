@@ -1,12 +1,18 @@
 import csv
 
-'''inList = open('replace_list.csv', 'r').readlines()
+inList = open('antonym_list.txt', 'r').readlines()
+f = open('replace_list2.csv', 'w')
+kv = []
 for item in inList:
-    kv = item.split(",")
-    rList.append([kv[0],kv[1]])
-    rList.append([kv[1],kv[0]])'''
+    kv = item.split("\t")
+    kv[2] = kv[2].split(",")
+    for antonym in kv[2]:
+        if not antonym==' ':
+            f.write(kv[0]+','+antonym.strip()+"\n")
+            f.write(antonym.strip()+','+kv[0]+"\n")
+f.close()
 
-rList = []    
+'''rList = []    
 input = '1'
 while(input=='1'):
     k = raw_input("k: ")
@@ -18,4 +24,4 @@ while(input=='1'):
 
 with open('replace_list.csv', 'wb') as f:
     wtr = csv.writer(f, delimiter=',')
-    wtr.writerows(rList)
+    wtr.writerows(rList)'''

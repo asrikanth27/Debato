@@ -55,10 +55,11 @@ class conversation_class:
             print '\n', str(index), ') ', line
         return False
 
-def run(take_raw=False):
+def run(input_string,take_raw=False):
     # Text Analysis ----------------------------------------------------------------------------
-    if not take_raw:
-       raw_query = raw_input('Enter argument: ')
+    #if not take_raw:
+    #   raw_query = raw_input('Enter argument: ')
+    raw_query = input_string
     conversation = conversation_class(raw_query)
     print 'Starting text analysis...\n'
     # search_query_array = extract_info.noun_phrases(raw_query)
@@ -196,6 +197,4 @@ def run(take_raw=False):
         print search_query
 
     print '\n\nDone:)'
-    return 
-
-run()
+    return conversation.counters

@@ -161,16 +161,21 @@ def queryGenerator(raw_input_string, change_sentiment):
         #Step 12.0: Build a dictionary of the replaceable words
         #
         #Note:make priority lists for different set of words
-        lines = open('replace_list.csv', 'r').readlines()
-        replace_dict = {}
-        for line in lines:
-            kv = line.split(',')
-            replace_dict[kv[0]] = kv[1][:-2]
+        def create_replace_dict(lines):
+            replace_dict = {}
+            for line in lines:
+                kv = line.split(',')
+                replace_dict[kv[0]] = kv[1][:-2]
+            return replace_dict
         #
         #Step 12.1: Replace words from the given phrase
         #
         def replace_words(phrase):
-            new_phrase = replace_all(phrase, replace_dict)
+            l = open('replace_list.csv', 'r').readlines()
+            new_phrase = replace_all(phrase, l)
+            if new_phrase==phrase:
+                l=open('replace_list2.csv', 'r').readlines()
+                new_phrase = replace_all(phrase, l)
             return new_phrase
         final_query = replace_words(final_query)
 

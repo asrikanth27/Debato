@@ -8,8 +8,8 @@ for item in inList:
     kv[2] = kv[2].split(",")
     for antonym in kv[2]:
         if not antonym==' ':
-            f.write(kv[0]+','+antonym.strip()+"\n")
-            f.write(antonym.strip()+','+kv[0]+"\n")
+            f.write(' '+kv[0]+' ,'+' '+antonym.strip()+"  \n")
+            f.write(' '+antonym.strip()+' ,'+' '+kv[0]+"  \n")
 f.close()
 
 '''rList = []    
@@ -22,6 +22,6 @@ while(input=='1'):
     input = raw_input("inp: ")
 
 
-with open('replace_list.csv', 'wb') as f:
-    wtr = csv.writer(f, delimiter=',')
-    wtr.writerows(rList)'''
+f = open('replace_list.csv', 'ws')
+for item in rList:
+    f.write(item[0]+" ,"+item[1]+" \n")'''

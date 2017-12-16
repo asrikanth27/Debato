@@ -9,7 +9,7 @@ var conversation = document.getElementById("conversation")
 var sendMessageBox = document.getElementById("sendMessage")
 var sendMessageBt = document.getElementById("sendMessageBut")
 
-sendMessageBt.onclick = function{
+sendMessageBt.onclick = function() {
     var message = sendMessageBox.value
     if (message!='' || message!=null){
         sendMessage(message)

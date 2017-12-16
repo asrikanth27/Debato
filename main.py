@@ -347,6 +347,7 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
         print search_query
 
     print '\n\nDone:)'
+
     if returnall==False:
         if len(conversation.counters)<=3:
             return conversation.counters

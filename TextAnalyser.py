@@ -7,6 +7,9 @@ def replace_all(t, dic):
     for i, j in dic.iteritems():
         text = t.replace(i, j)
         if not text==t:
+            print t
+            print i,j
+            print text
             break
     return text
 
@@ -116,13 +119,11 @@ def queryGenerator(raw_input_string, change_sentiment):
         pnp = pnp.string
         query = query+pnp+" "
         #print 'pnp:'+pnp
-   
-    #
-    #Step 9: Filter query for articles: a,an,the,is
-    #
-    reps = {' a ':' ', ' an ':' ', ' the ':' ', ' is ':' '}
-    query = replace_all(query, reps)
 
+    #
+    #Step 9: [Blank]
+    #
+   
     #
     #Step 10: Remove repetitive words from the sentence
     #
@@ -137,7 +138,6 @@ def queryGenerator(raw_input_string, change_sentiment):
     final_query = ""
     for wrd in final_words:
         final_query = final_query+wrd+" "
-
 
     #
     #Step 11: Sort the query words in order of the input
@@ -156,19 +156,25 @@ def queryGenerator(raw_input_string, change_sentiment):
     for index in indexes:
         final_query = final_query+index_dict[index]+" "
 
+    #
+    #Step 12.0: Filter query for articles: a,an,the,is
+    #
+    reps = {' a ':' ', ' an ':' ', ' the ':' ', ' is ':' '}
+    query = replace_all(query, reps)
+
     if change_sentiment:
         #
-        #Step 12.0: Build a dictionary of the replaceable words
+        #Step 12.1: Build a dictionary of the replaceable words
         #
         #Note:make priority lists for different set of words
         def create_replace_dict(lines):
             replace_dict = {}
             for line in lines:
                 kv = line.split(',')
-                replace_dict[kv[0]] = kv[1][:-2]
+                replace_dict[kv[0]] = kv[1][:-1]
             return replace_dict
         #
-        #Step 12.1: Replace words from the given phrase
+        #Step 12.2: Replace words from the given phrase
         #
         def replace_words(phrase):
             l = open('replace_list.csv', 'r').readlines()

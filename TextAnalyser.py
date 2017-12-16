@@ -161,31 +161,43 @@ def queryGenerator(raw_input_string, change_sentiment):
         #Step 12.0: Build a dictionary of the replaceable words
         #
         #Note:make priority lists for different set of words
-        lines = open('replace_list.csv', 'r').readlines()
-        replace_dict = {}
-        for line in lines:
-            kv = line.split(',')
-            replace_dict[kv[0]] = kv[1][:-2]
+        def create_replace_dict(lines):
+            replace_dict = {}
+            for line in lines:
+                kv = line.split(',')
+                replace_dict[kv[0]] = kv[1][:-2]
+            return replace_dict
         #
         #Step 12.1: Replace words from the given phrase
         #
         def replace_words(phrase):
-            new_phrase = replace_all(phrase, replace_dict)
+            l = open('replace_list.csv', 'r').readlines()
+            new_phrase = replace_all(phrase, create_replace_dict(l))
+            if new_phrase==phrase:
+                l=open('replace_list2.csv', 'r').readlines()
+                new_phrase = replace_all(phrase, create_replace_dict(l))
             return new_phrase
         final_query = replace_words(final_query)
 
-    #
-    #Step 13: Get the sentiment of the final query
-    #
-    '''final_query_sentiment = getSentiment(final_query)'''
+        #
+        #Step 13: Get the sentiment of the final query
+        #
+        '''final_query_sentiment = getSentiment(final_query)'''
 
-    #
-    #Step 14: Print out the query
-    #
-    print "<------------------------------------------->"
-    print "in:", s
-    print "out:", final_query
-    print "<------------------------------------------->"
+        #
+        #Step 14: Print out the query
+        #
+        print "<------------------------------------------->"
+        print "in:", s
+        print "out:", final_query
+        print "<------------------------------------------->"
 
-    return final_query, False
-    
+        return final_query, False
+        
+    else:
+        print "<------------------------------------------->"
+        print "in:", s
+        print "out:", s
+        print "<------------------------------------------->"
+
+        return s, False

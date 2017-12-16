@@ -28,7 +28,6 @@ try:
 	while 1:
 	    data = conn.recv(100)
 	    print 'Data: ', data
-	    main.run(str(data))
 	    if data=='':
 	    	conn.close()
 	    	print 'Waiting for new connection...'
@@ -36,6 +35,8 @@ try:
 	    	# new_conn()
 	    	# raise KeyboardInterrupt
 	    else:
+	    	print 'Hello'
+	    	main.run(str(data))
 	    	conn.send(data)
 	conn.close()
 except (KeyboardInterrupt, socket.error):

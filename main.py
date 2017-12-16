@@ -43,7 +43,7 @@ class conversation_class:
         index = 0
         for line in self.counters:
             index += 1
-            print '\n', str(index), ') ', line
+            print '\n', str(index), ') ', line.replace('\n', ' ')
             if index==3:
                 break
         return False
@@ -55,7 +55,7 @@ class conversation_class:
             print '\n', str(index), ') ', line
         return False
 
-def run(raw_query, take_raw=False):
+def run(raw_query, change_sentiment=True, recursing=False):
     # Text Analysis ----------------------------------------------------------------------------
     # if not take_raw:
        # raw_query = raw_input('Enter argument: ')
@@ -63,7 +63,7 @@ def run(raw_query, take_raw=False):
     conversation = conversation_class(raw_query)
     print 'Starting text analysis...\n'
     # search_query_array = extract_info.noun_phrases(raw_query)
-    search_query, isMeaning = TextAnalyser.queryGenerator(raw_query, not take_raw)
+    search_query, isMeaning = TextAnalyser.queryGenerator(raw_query, change_sentiment)
     search_query = str(search_query)
     conversation.addSearchQuery(search_query)
 
@@ -144,13 +144,21 @@ def run(raw_query, take_raw=False):
             google_counters = get_relevant.get_array(google_text, conversation.user_argument, google_range, similarity_threshold['Google'])
         except (UnicodeDecodeError, UnicodeEncodeError):
             print '\nUnicode exception at google_counters(similarity) !, trying utf-8 encoding'
-            google_text = [iterator.encode('utf-8') for iterator in combined]
+            # for iterator in google_text:
+                # print iterator.decode('utf-8')
+            def force_to_unicode(text):
+                # "If text is unicode, it is returned as is. If it's str, convert it to Unicode using UTF-8 encoding"
+                return text if isinstance(text, unicode) else text.decode('utf8')
+            google_text = [force_to_unicode(iterator) for iterator in google_text]
             google_counters = get_relevant.get_array(google_text, conversation.user_argument, twitter_range, similarity_threshold['Google'])
         try:
             twitter_counters = get_relevant.get_array(twitter_text, conversation.user_argument, google_range, similarity_threshold['Twitter'])
         except (UnicodeDecodeError, UnicodeEncodeError):
             print '\nUnicode exception at twtter_counters(similarity) !, trying utf-8 encoding'
-            twitter_text = [iterator.encode('utf-8') for iterator in combined]
+            def force_to_unicode(text):
+                # "If text is unicode, it is returned as is. If it's str, convert it to Unicode using UTF-8 encoding"
+                return text if isinstance(text, unicode) else text.decode('utf8')
+            twitter_text = [force_to_unicode(iterator) for iterator in twitter_text]
             twitter_counters = get_relevant.get_array(twitter_text, conversation.user_argument, twitter_range, similarity_threshold['Twitter'])
         # tweets = get_relevant.get_array(sentences, raw_query, twitter_range)
         conversation.addCounters(google_counters)
@@ -158,9 +166,9 @@ def run(raw_query, take_raw=False):
 
         response_analyzed_string_array = []
         rerun = conversation.printCounters()
-        if rerun:
+        if rerun and not recursing:
             print '\nRerunning as counters not up to the mark!'
-            run(conversation.user_argument)
+            run(conversation.user_argument, change_sentiment=False, recursing=True)
             return
 
         f = open('previous_results.json', 'w')

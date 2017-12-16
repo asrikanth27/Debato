@@ -1,15 +1,17 @@
 yes ,no 
 no ,yes 
-should ,should not 
-should not ,should 
 good ,bad 
 bad ,good 
+lucky ,unlucky 
+unlucky ,lucky 
+great ,small 
+small ,great 
+should ,should not 
+should not ,should 
 best ,worst 
 worst ,best 
 love ,hate 
 hate ,love 
-lucky ,unlucky 
-unlucky ,lucky 
 safe ,dangerous 
 dangerous ,safe 
 better ,worse 
@@ -18,10 +20,6 @@ rich ,poor
 poor ,rich 
 above ,below 
 below ,above 
-excellent ,at par 
-at par , excellent
-great ,small
-small,great 
 success ,failure 
 failure ,success 
 powerful ,weak 

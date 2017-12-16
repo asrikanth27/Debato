@@ -2,7 +2,7 @@ from textblob import TextBlob, Word
 
 def getIfMeaning(input_string):
     s = input_string
-    if s.find('meaning of')>=0:
+    if s.find('meaning of')==0:
         s = s.replace('meaning of ', '')
         return str(s), True
     else:

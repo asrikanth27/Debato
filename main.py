@@ -210,6 +210,7 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
     # search_query_array = extract_info.noun_phrases(raw_query)
     search_query, isMeaning = TextAnalyser.queryGenerator(raw_query, change_sentiment)
     search_query = str(search_query)
+    # search_query = 'bitcoins are underrated'
     conversation.addSearchQuery(search_query)
 
     # If user doesn't ask for meaning ----------------------------------------------------------

@@ -24,7 +24,8 @@ def get_array(sentences, raw_query, work_range, similarity_threshold_max):
         # finally:
         index += 1
 
-    sort_values = sorted(sort_values, reverse=False) # alternatively sort_values.sort()
+    sort_values = sorted(sort_values, reverse=True) # alternatively sort_values.sort()
+    print '\nSort Values: ', sort_values
     sort_values = [sort_linker[index] for index in sort_values]
     # reply_sorted = [sort_linker[index] for index in sort_values]
     similarity_threshold_mid = similarity_threshold_max - 0.1

@@ -7,9 +7,9 @@ def replace_all(t, dic):
     for i, j in dic.iteritems():
         text = t.replace(i, j)
         if not text==t:
-            print t
-            print i,j
-            print text
+            # print t
+            # print i,j
+            # print text
             break
     return text
 

@@ -306,8 +306,6 @@
  unhealthy , healthy  
  healthy , ill  
  ill , healthy  
- healthy , diseased  
- diseased , healthy  
  here , there  
  there , here  
  heavy , light  

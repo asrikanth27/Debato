@@ -104,6 +104,9 @@ app.controller("chat_controller", function($scope, $http) {
                         current_display: 0,
                         confidence: response.data.confidence
                     });
+                    var temp = $scope.counters[$scope.counters.length-1].Google[$scope.counters[$scope.counters.length-1].Google.length-1].text.split('-ang-');//[$scope.counters.Google.length-1].split('-ang-');
+                    console.log('Haha temp: ', temp);
+                    $scope.counters[$scope.counters.length-1].Google[$scope.counters[$scope.counters.length-1].Google.length-1].text = temp.join('<br />');
                     //for(var chat in $scope.counters) {
                     $scope.display_counters.push({
                         Google: $scope.counters[$scope.counters.length - 1].Google[$scope.counters[$scope.counters.length - 1].current_display],
@@ -153,6 +156,9 @@ app.controller("chat_controller", function($scope, $http) {
                     current_display: 0,
                     confidence: response.data.confidence
                 });
+                var temp = $scope.counters[$scope.counters.length-1].Google[$scope.counters[$scope.counters.length-1].Google.length-1].text.split('-ang-');//[$scope.counters.Google.length-1].split('-ang-');
+                console.log('Haha temp: ', temp);
+                $scope.counters[$scope.counters.length-1].Google[$scope.counters[$scope.counters.length-1].Google.length-1].text = temp.join('<br />');
                 //for(var chat in $scope.counters_2) {
                 $scope.display_counters_2.push({
                     Google: $scope.counters_2[$scope.counters_2.length - 1].Google[$scope.counters_2[$scope.counters_2.length - 1].current_display],

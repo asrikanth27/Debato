@@ -26,12 +26,12 @@ def get_info(search_query):
 	engineArray = [engineGoogle, engineTwitter]
 
 	# Google
-	for i in range(1, 2):
+	for i in range(1, 3):
 		for para in engineGoogle.search(search_query, type=SEARCH, start=i, count=5):
 			google.append({ 'text': para.text, 'url': para.url, 'title': para.title })
 		#resultGoogle = resultGoogle + ([para.text for para in engineGoogle.search(search_query, type=SEARCH, start=i, count=10)])
 	# Twitter
-	for i in range(1, 2):
+	for i in range(1, 3):
 		for para in engineTwitter.search(search_query, type=SEARCH, start=i, count=5):
 			twitter.append({ 'text': para.text, 'url': para.url, 'title': para.title })
 		#resultTwitter = resultTwitter + ([para.text for para in engineTwitter.search(search_query, type=SEARCH, start=i, count=10)])

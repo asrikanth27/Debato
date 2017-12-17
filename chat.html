@@ -41,61 +41,142 @@
                                 </a>
                             </div>
                         </div>
-                        <!-- <div class="panel-collapse collapse" id="collapseOne"> -->
-                        <div class="panel-body">
-                            <ul class="chat">
-                                <li class="left clearfix" ng-repeat="counter in display_counters track by $index">
-                                    <button id="{{'left_toggle'+$index}}" ng-click="left_toggle($index)" class="pull-left" ng-if="$index%2==1">
-                                        <</button>
-                                            <button id="{{'right_toggle'+$index}}" ng-click="right_toggle($index)" class="pull-right" ng-if="$index%2==1">></button>
-                                            <span class="chat-img pull-right" ng-if="$index%2==0"><img src="http://placehold.it/50/55C1E7/fff&text=USER" alt="User Avatar" class="img-circle" /></span>
-                                            <span class="chat-img pull-left" ng-if="$index%2==1"><img src="http://placehold.it/50/55C1E7/fff&text=MACHINE" alt="User Avatar" class="img-circle" /></span>
-                                            <div class="chat-body clearfix pull-right" ng-if="$index%2==0">
-                                                <div class="header">
-                                                    <strong class="primary-font"></strong> <small class="pull-right text-muted">
+                        <form>
+                            Feature
+                            <input type="radio" ng-model="feature_type" value="1">Debate
+                            <input type="radio" ng-model="feature_type" value="2">Quick Info
+                            <input type="radio" ng-model="feature_type" value="3">Meaning
+                        </form>
+                        <div ng-switch="feature_type">
+                            <div ng-switch-when="1">
+                                <h1>Debate</h1>
+                                <!-- <div class="panel-collapse collapse" id="collapseOne"> -->
+                                <div class="panel-body">
+                                    <ul class="chat">
+                                        <li class="left clearfix" ng-repeat="counter in display_counters track by $index">
+                                            <button id="{{'left_toggle'+$index}}" ng-click="left_toggle($index)" class="pull-left" ng-if="$index%2==1">
+                                                <</button>
+                                                    <button id="{{'right_toggle'+$index}}" ng-click="right_toggle($index)" class="pull-right" ng-if="$index%2==1">></button>
+                                                    <span class="chat-img pull-right" ng-if="$index%2==0"><img src="http://placehold.it/50/55C1E7/fff&text=USER" alt="User Avatar" class="img-circle" /></span>
+                                                    <span class="chat-img pull-left" ng-if="$index%2==1"><img src="http://placehold.it/50/55C1E7/fff&text=MACHINE" alt="User Avatar" class="img-circle" /></span>
+                                                    <div class="chat-body clearfix pull-right" ng-if="$index%2==0">
+                                                        <div class="header">
+                                                            <strong class="primary-font"></strong> <small class="pull-right text-muted">
                                         <span class="glyphicon glyphicon-time"></span>12 mins ago</small>
-                                                </div>
-                                                <p>
-                                                    {{counter}}<!-- , {{$index}} --> <!-- Note: this is for user searches -->
-                                                </p>
-                                            </div>
-                                            <div class="chat-body clearfix pull-left" ng-if="$index%2==1">
-                                                <div class="header">
-                                                    <strong class="primary-font"></strong> <small class="pull-right text-muted">
+                                                        </div>
+                                                        <p>
+                                                            {{counter}}
+                                                            <!-- , {{$index}} -->
+                                                            <!-- Note: this is for user searches -->
+                                                        </p>
+                                                    </div>
+                                                    <div class="chat-body clearfix pull-left" ng-if="$index%2==1">
+                                                        <div class="header">
+                                                            <strong class="primary-font"></strong> <small class="pull-right text-muted">
                                                     <span class="glyphicon glyphicon-time"></span>12 mins ago</small>
-                                                </div>
-                                                <p>
-                                                    {{counter.text}}<!-- , {{$index}} -->
-                                                </p>
-                                                <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal" ng-click="showTweets($index)">Show Tweets</button>
-                                                <!-- Modal -->
-                                                <div id="myModal" class="modal fade" role="dialog">
-                                                    <div class="modal-dialog">
-                                                        <!-- Modal content-->
-                                                        <div class="modal-content">
-                                                            <div class="modal-header">
-                                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                                                <h4 class="modal-title">Tweets</h4>
-                                                            </div>
-                                                            <div class="modal-body" ng-repeat="tweet in tweets track by $index">
-                                                                <p>{{tweet}}</p>
-                                                            </div>
-                                                            <div class="modal-footer">
-                                                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                                        </div>
+                                                        <h4>{{counter.Google.title}}</h4>
+                                                        <p>{{counter.Google.text}}
+                                                            <!-- , {{$index}} -->
+                                                        </p>
+                                                        <footer>({{counter.confidence}}), url: <a>{{counter.Google.url}}</a></footer>
+                                                        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal" ng-click="showTweets($index)">Show Tweets</button>
+                                                        <!-- Modal -->
+                                                        <div id="myModal" class="modal fade" role="dialog">
+                                                            <div class="modal-dialog">
+                                                                <!-- Modal content-->
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                                        <h4 class="modal-title">Tweets</h4>
+                                                                    </div>
+                                                                    <div class="modal-body" ng-repeat="tweet in tweets track by $index">
+                                                                        <h3>{{tweet.title}}</h3>
+                                                                        <p>{{tweet.text}}</p>
+                                                                        <footer>{{tweet.url}}</footer>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                </li>
-                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div ng-switch-when="2">
+                                <h1>Quick Info</h1>
+                                <!-- <div class="panel-collapse collapse" id="collapseOne"> -->
+                                <div class="panel-body">
+                                    <ul class="chat">
+                                        <li class="left clearfix" ng-repeat="counter_2 in display_counters_2 track by $index">
+                                            <button id="{{'left_toggle_2'+$index}}" ng-click="left_toggle_2($index)" class="pull-left" ng-if="$index%2==1">
+                                                <</button>
+                                                    <button id="{{'right_toggle_2'+$index}}" ng-click="right_toggle_2($index)" class="pull-right" ng-if="$index%2==1">></button>
+                                                    <span class="chat-img pull-right" ng-if="$index%2==0"><img src="http://placehold.it/50/55C1E7/fff&text=USER" alt="User Avatar" class="img-circle" /></span>
+                                                    <span class="chat-img pull-left" ng-if="$index%2==1"><img src="http://placehold.it/50/55C1E7/fff&text=MACHINE" alt="User Avatar" class="img-circle" /></span>
+                                                    <div class="chat-body clearfix pull-right" ng-if="$index%2==0">
+                                                        <div class="header">
+                                                            <strong class="primary-font"></strong> <small class="pull-right text-muted">
+                                        <span class="glyphicon glyphicon-time"></span>12 mins ago</small>
+                                                        </div>
+                                                        <p>
+                                                            {{counter_2}}
+                                                            <!-- , {{$index}} -->
+                                                            <!-- Note: this is for user searches -->
+                                                        </p>
+                                                    </div>
+                                                    <div class="chat-body clearfix pull-left" ng-if="$index%2==1">
+                                                        <div class="header">
+                                                            <strong class="primary-font"></strong> <small class="pull-right text-muted">
+                                                    <span class="glyphicon glyphicon-time"></span>12 mins ago</small>
+                                                        </div>
+                                                        <h4>{{counter_2.Google.title}}</h4>
+                                                        <p>{{counter_2.Google.text}}
+                                                            <!-- , {{$index}} -->
+                                                        </p>
+                                                        <footer>({{counter_2.confidence}}), url: <a>{{counter_2.Google.url}}</a></footer>
+                                                        <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal" ng-click="showTweets_2($index)">Show Tweets</button>
+                                                        <!-- Modal -->
+                                                        <div id="myModal" class="modal fade" role="dialog">
+                                                            <div class="modal-dialog">
+                                                                <!-- Modal content-->
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                                        <h4 class="modal-title">Tweets</h4>
+                                                                    </div>
+                                                                    <div class="modal-body" ng-repeat="tweet_2 in tweets_2 track by $index">
+                                                                        <h3>{{tweet_2.title}}</h3>
+                                                                        <p>{{tweet_2.text}}</p>
+                                                                        <footer>{{tweet_2.url}}</footer>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div ng-switch-when="3">
+                                <h1>Cars</h1>
+                                <p>Read about cars.</p>
+                            </div>
                         </div>
                         <div class="panel-footer">
                             <div class="input-group">
                                 <input id="btn-input" type="text" class="form-control input-sm" placeholder="Type your message here..." ng-model="raw_query" />
                                 <span class="input-group-btn">
-                            <button class="btn btn-warning btn-sm" id="btn-chat" ng-click="search()">
+                            <button class="btn btn-warning btn-sm" id="btn-chat" ng-click="search()" ng-if="feature_type==1">
                                 Send</button>
+                            <button class="btn btn-warning btn-sm" id="btn-chat" ng-click="search()" ng-if="feature_type==2">
+                                Search</button>
                         </span>
                             </div>
                         </div>

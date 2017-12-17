@@ -63,12 +63,12 @@ class conversation_class:
         for string in google:
             for data in self.mined_data['Google']:
                 if data['text']==string:
-                    result_google.append({ 'url': plaintext(data['url']).encode('utf-8'), 'title': plaintext(data['title']).encode('utf-8'), 'text': plaintext(data['text']).encode('utf-8') })
+                    result_google.append(data)
         result_twitter = []
         for string in twitter:
             for data in self.mined_data['Twitter']:
                 if data['text']==string:
-                    result_twitter.append({ 'url': plaintext(data['url']).encode('utf-8'), 'title': plaintext(data['title']).encode('utf-8'), 'text': plaintext(data['text']).encode('utf-8') })
+                    result_twitter.append(data)
 
         self.result = { 'Error': None, 'Google': result_google, 'Twitter': result_twitter }
         return self.result
@@ -180,8 +180,7 @@ def run_multiple(raw_query, change_sentiment=True, recursing=False):
         index = 0
         for google in conversation_multi.mined_data['Google']:
             for counter_text in google_counters:
-                # if plaintext(google['text']).encode('utf-8') ==  counter_text:
-                if plaintext(google['text']) ==  counter_text: # replaced from above
+                if plaintext(google['text']).encode('utf-8') ==  counter_text:
                     google_counters_array.append(google)
                     index += 1
                 if index>=3:
@@ -192,8 +191,7 @@ def run_multiple(raw_query, change_sentiment=True, recursing=False):
         google_counters_array = []
         for google in conversation_multi.mined_data['Google']:
             for counter_text in google_counters:
-                # if plaintext(google['text']).encode('utf-8') ==  counter_text:
-                if plaintext(google['text']).encode('utf-8') ==  counter_text:  # replaced from above
+                if plaintext(google['text']).encode('utf-8') ==  counter_text:
                     google_counters_array.append(google)
 
         json.dump(google_counters_array, f)
@@ -225,9 +223,10 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
     
     conversation = conversation_class(raw_query)
     print 'Starting text analysis...\n'
+    # search_query_array = extract_info.noun_phrases(raw_query)
     search_query, isMeaning = TextAnalyser.queryGenerator(raw_query, change_sentiment)
-    # search_query, isMeaning = 'Modi bad minister', False
     search_query = str(search_query)
+    # search_query = 'bitcoins are underrated'
     conversation.addSearchQuery(search_query)
 
     # If user doesn't ask for meaning ----------------------------------------------------------
@@ -243,17 +242,12 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
             index=0
             for data in mined_data[engine]:
                 try:
-                    data['text'] = data['text']
-                    data['url'] = data['url']
-                    data['title'] = data['title']
-                    # data['text'] = data['text'].encode('utf-8')
-                    # data['url'] = data['url'].encode('utf-8')
-                    # data['title'] = data['title'].encode('utf-8')
-                    # data['text'] = data['text'].encode('ascii')
-                    # data['url'] = data['url'].encode('ascii')
-                    # data['title'] = data['title'].encode('ascii')
+                    data['text'] = data['text'].encode('ascii')
+                    data['url'] = data['url'].encode('ascii')
+                    data['title'] = data['title'].encode('ascii')
+                    # data['url'] = [data_single.encode('ascii') for data_single in data['url']]
+                    # data['title'] = [data_single.encode('ascii') for data_single in data['title']]
                 except (UnicodeEncodeError, UnicodeDecodeError):
-                    print '\nEncode error at information mining 257...'
                     data['text'] = data['text'].encode('utf-8')
                     data['url'] = data['url'].encode('utf-8')
                     data['title'] = data['title'].encode('utf-8')
@@ -333,8 +327,8 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
         rerun = conversation.printCounters()
         if rerun and not recursing:
             print '\nRerunning as counters not up to the mark!'
-            return run(conversation.user_argument, change_sentiment=False, recursing=True)
-            # return
+            run(conversation.user_argument, change_sentiment=False, recursing=True)
+            return
 
         f = open('previous_results.json', 'w')
         if len(google_counters) > 3:
@@ -342,8 +336,7 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
             index = 0
             for google in conversation.mined_data['Google']:
                 for counter_text in google_counters:
-                    # if plaintext(google['text']).encode('utf-8') ==  counter_text:
-                    if plaintext(google['text']) ==  counter_text:  # replaced from above
+                    if plaintext(google['text']).encode('utf-8') ==  counter_text:
                         google_counters_array.append(google)
                         index += 1
                     if index>=3:
@@ -354,8 +347,7 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
             google_counters_array = []
             for google in conversation.mined_data['Google']:
                 for counter_text in google_counters:
-                    # if plaintext(google['text']).encode('utf-8') ==  counter_text:
-                    if plaintext(google['text']) ==  counter_text:  # replaced from above
+                    if plaintext(google['text']).encode('utf-8') ==  counter_text:
                         google_counters_array.append(google)
 
             json.dump(google_counters_array, f)
@@ -374,14 +366,12 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
     print '\n\nDone:)'
 
     return_result = conversation.resultFormer(conversation.counters, conversation.tweets)
-    print '\nReturn Result: ', return_result
+    print return_result
 
     if returnall==False:
         if len(conversation.counters)<=3:
-            return return_result
-            # return {'Google': conversation.counters, 'Twitter': conversation.tweets, 'Error': None}
+            return {'Google': conversation.counters, 'Twitter': conversation.tweets, 'Error': None}
         else:
-            return return_result
-            # return {'Google': conversation.counters[0:3], 'Twitter': conversation.tweets, 'Error': None}
+            return {'Google': conversation.counters[0:3], 'Twitter': conversation.tweets, 'Error': None}
     else:
         return conversation.mined_data

@@ -11,12 +11,16 @@ def get_array(sentences, raw_query, work_range, similarity_threshold):
         similarity_value = symmetric_sentence_similarity(sentence, raw_query)
         if similarity_value > similarity_threshold:
             sort_values.append(similarity_value)
-            try:
-                reply_unsorted.append(str(plaintext(sentence)))
-                sort_linker[similarity_value] = str(plaintext(sentence));
+            try:    # remove because it holds meaning no more.
+                reply_unsorted.append(sentence.encode('utf-8'))  # old
+                sort_linker[similarity_value] = sentence.encode('utf-8') # old
+                # `reply_unsorted.append(plaintext(sentence).encode('utf-8'))  # old
+                # sort_linker[similarity_value] = plaintext(sentence).encode('utf-8') # old
+                # reply_unsorted.append(str(plaintext(sentence)))   # oldest
+                # sort_linker[similarity_value] = str(plaintext(sentence))  # oldest
             except (UnicodeDecodeError, UnicodeEncodeError):
                 reply_unsorted.append(plaintext(sentence).encode('utf-8'))
-                sort_linker[similarity_value] = plaintext(sentence).encode('utf-8');
+                sort_linker[similarity_value] = plaintext(sentence).encode('utf-8')
             finally:
                 index += 1
 

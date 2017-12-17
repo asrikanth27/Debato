@@ -1,6 +1,6 @@
 from flask import Flask, redirect, url_for, request, render_template, send_file
 import main, os
-import socket, queryServer, urllib2, json
+import socket, urllib2, json
 app = Flask(__name__)
 
 # -------------------------------------------------------------------------------------

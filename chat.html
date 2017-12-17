@@ -56,7 +56,7 @@
                                         <span class="glyphicon glyphicon-time"></span>12 mins ago</small>
                                                 </div>
                                                 <p>
-                                                    {{counter}}, {{$index}}
+                                                    {{counter}}<!-- , {{$index}} --> <!-- Note: this is for user searches -->
                                                 </p>
                                             </div>
                                             <div class="chat-body clearfix pull-left" ng-if="$index%2==1">
@@ -65,7 +65,7 @@
                                                     <span class="glyphicon glyphicon-time"></span>12 mins ago</small>
                                                 </div>
                                                 <p>
-                                                    {{counter}}, {{$index}}
+                                                    {{counter.text}}<!-- , {{$index}} -->
                                                 </p>
                                                 <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal" ng-click="showTweets($index)">Show Tweets</button>
                                                 <!-- Modal -->

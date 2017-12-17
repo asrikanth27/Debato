@@ -232,7 +232,6 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
         search_query, isMeaning = TextAnalyser.queryGenerator(raw_query, change_sentiment)
     # search_query, isMeaning = 'Modi bad minister', False
     search_query = str(search_query)
-    search_query = 'Automation is not good for the economy'
     print '\nSearch query: ', search_query
     conversation.addSearchQuery(search_query)
 

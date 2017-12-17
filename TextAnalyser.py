@@ -207,3 +207,5 @@ def queryGenerator(raw_input_string, change_sentiment):
         print "<------------------------------------------->"
 
         return s, False
+
+print queryGenerator("Modi is a good prime minister", True)

@@ -1,6 +1,6 @@
 from flask import Flask, redirect, url_for, request, render_template, send_file
 import main, os
-import socket, queryServer, urllib2, json
+import socket, urllib2, json
 app = Flask(__name__)
 
 # -------------------------------------------------------------------------------------
@@ -64,29 +64,38 @@ def home():
 @app.route('/debate', methods=["POST", "GET"])
 @crossdomain(origin='*')
 def debate():
-	# queryServer.fetchDataFromServer('Automation is bad for the economy.')
-	if request.method == "GET":
-		query =  urllib2.unquote(request.args.get('query')).decode('utf8')
-		print 'GET method called haha!! ', query
-	elif request.method == "POST":
-		query = request.form['query']
+    # queryServer.fetchDataFromServer('Automation is bad for the economy.')
+    if request.method == "GET":
+        query =  urllib2.unquote(request.args.get('query')).decode('utf8')
+        print 'GET method called haha!! ', query
+    elif request.method == "POST":
+        query = request.form['query']
+    print '\nQuery: ', query
+    results, confidence = main.run(query, change_sentiment=True)
+    # print '\nSending results', results
+    # print '\nConfidence: ', confidence
+    response_query = ''
+    return json.dumps({"results": results, "confidence": confidence})
 
-	print '\nQuery: ', query
-	results = main.run(query, True)
-	# results = ['hello']
-	response_query = ''
-	index = 0
-	def force_to_unicode(text):
-		return text if isinstance(text, unicode) else text.decode('utf8')
-	for para in results:
-		response_query += str(index) + ') ' + para + '\n'# force_to_unicode(para) + '\n'
-		# results[index] = para# force_to_unicode(para)
-		print str(index) + ') ' + para# force_to_unicode(para)
-		index += 1
-	return json.dumps(results)
+@app.route('/quick_info', methods=["POST", "GET"])
+@crossdomain(origin='*')
+def quick_info():
+    # queryServer.fetchDataFromServer('Automation is bad for the economy.')
+    if request.method == "GET":
+        query =  urllib2.unquote(request.args.get('query')).decode('utf8')
+        print 'GET method called haha!! ', query
+    elif request.method == "POST":
+        query = request.form['query']
+    print '\nQuery: ', query
+    results, confidence = main.run(query, change_sentiment=False)
+    # print '\nSending results', results
+    # print '\nConfidence: ', confidence
+    response_query = ''
+    return json.dumps({"results": results, "confidence": confidence})
 
 
 @app.route('/chat')
+@crossdomain(origin='*')
 def chat():
 	HOST = '127.0.0.1'    # The remote host
 	PORT = 50007              # The same port as used by the server

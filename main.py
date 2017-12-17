@@ -1,5 +1,5 @@
 print 'Loading libraries...\n'
-import data_mine, json, get_relevant, TextAnalyser, time # , pickle
+import data_mine, json, get_relevant, TextAnalyser, time, sentence_similarity # , pickle
 from pattern.web import plaintext
 
 print 'Whenever you are ready ... '
@@ -232,8 +232,7 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
         search_query, isMeaning = TextAnalyser.queryGenerator(raw_query, change_sentiment)
     # search_query, isMeaning = 'Modi bad minister', False
     search_query = str(search_query)
-    search_query = 'Automation is not good for the economy'
-    print '\nSearch query: ', search_query
+    # print '\nSearch query: ', search_query
     conversation.addSearchQuery(search_query)
 
     # If user doesn't ask for meaning ----------------------------------------------------------
@@ -354,6 +353,8 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
         conversation.counters = remove_duplicate(conversation.counters)
         google_counters = conversation.counters
 
+        print '\nPassing google_counters to get_array'
+        efficient_sentences = sentence_similarity.get_sentences(google_counters, raw_query)
         rerun = conversation.printCounters()
         # if rerun and not recursing:
         #     print '\nRerunning as counters not up to the mark!'
@@ -395,12 +396,17 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
     else:
         print search_query
         confidence = ''
-        return_result = {'Google': [{'url': '', 'text': search_query, 'title': 'Meaning of'.join(raw_query)}], 'Twitter': [], 'Error': None}
+        title = 'Meaning of: ' + str(raw_query)
+        return {'Google': [{'url': '', 'text': search_query, 'title': title}], 'Twitter': [], 'Error': None}, ''
 
     print '\n\nDone:)'
 
     return_result = conversation.resultFormer(conversation.counters, conversation.tweets)
-    # print '\nReturn Result: ', return_result
+    def covert_points(sentence):
+        return plaintext(sentence).encode('utf-8') + ' -ang- '
+    efficient_sentences = [covert_points(sentence) for sentence in efficient_sentences]
+    return_result['Google'].append({'url': 'self url', 'text': ''.join(efficient_sentences), 'title': 'self title'})
+    print '\nReturn Result: ', return_result
 
     if returnall==False:
         if len(conversation.counters)<=3:

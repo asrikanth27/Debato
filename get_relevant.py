@@ -24,7 +24,8 @@ def get_array(sentences, raw_query, work_range, similarity_threshold_max):
         # finally:
         index += 1
 
-    sort_values = sorted(sort_values, reverse=False) # alternatively sort_values.sort()
+    sort_values = sorted(sort_values, reverse=True) # alternatively sort_values.sort()
+    print '\nSort Values: ', sort_values
     sort_values = [sort_linker[index] for index in sort_values]
     # reply_sorted = [sort_linker[index] for index in sort_values]
     similarity_threshold_mid = similarity_threshold_max - 0.1
@@ -40,25 +41,20 @@ def get_array(sentences, raw_query, work_range, similarity_threshold_max):
         sort_values.remove('')
     match_quality = 'H'
     index = [return_match(similarity_threshold_max, sort_values) for value in sort_values]
-    print 'Flag 1'
     if index>=3:
         reply_sorted = sort_values[0:3]
     elif index<3:
-        print 'Flag 2'
         match_quality = 'M'
         index = [return_match(similarity_threshold_mid, sort_values) for value in sort_values]
         if index>=3:
             reply_sorted = sort_values[0:3]
         elif index<3:
-            print 'Flag 3'
             match_quality = 'L'
             index = [return_match(similarity_threshold_min, sort_values) for value in sort_values]
             if index>=3:
                 reply_sorted = sort_values[0:3]
             elif index<3:
-                print 'Flag 4'
                 match_quality = 'NA'
                 reply_sorted = sort_values[0:index]
 
-    # print '\nGet Relevant: ', reply_sorted
     return reply_sorted, match_quality

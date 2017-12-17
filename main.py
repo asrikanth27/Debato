@@ -232,7 +232,7 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
         search_query, isMeaning = TextAnalyser.queryGenerator(raw_query, change_sentiment)
     # search_query, isMeaning = 'Modi bad minister', False
     search_query = str(search_query)
-    # print '\nSearch query: ', search_query
+    print '\nSearch query: ', search_query
     conversation.addSearchQuery(search_query)
 
     # If user doesn't ask for meaning ----------------------------------------------------------
@@ -299,7 +299,7 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
         fT.close()
         f = open('previous_results.json', 'r+')
         try:
-            conversation.addPreviousCounters(json.load(f))
+            conversation.addPreviousCounters(json.load(f)['Google'])
         except (ValueError):
             conversation.addPreviousCounters([])
         f.close()
@@ -321,7 +321,7 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
         twitter_text = [iterator['text'] for iterator in conversation.mined_data['Twitter']]
         similarity_threshold = {
             'Google': 0.7,
-            'Twitter': 0.5
+            'Twitter': 0.4
         }
         try:
             google_counters, match_quality_google = get_relevant.get_array(google_text, conversation.user_argument, google_range, similarity_threshold['Google'])
@@ -361,6 +361,8 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
         #     return run(conversation.user_argument, change_sentiment=False, recursing=True)
             # return
 
+        return_result = conversation.resultFormer(conversation.counters, conversation.tweets)
+
         f = open('previous_results.json', 'w')
         if len(google_counters) > 3:
             google_counters_array = []
@@ -374,7 +376,7 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
                     if index>=3:
                         break
 
-            json.dump(google_counters_array, f)
+            json.dump(return_result, f)
         else:
             google_counters_array = []
             for google in conversation.mined_data['Google']:
@@ -383,7 +385,7 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
                     if plaintext(google['text']) ==  counter_text:  # replaced from above
                         google_counters_array.append(google)
 
-            json.dump(google_counters_array, f)
+            json.dump(return_result, f)
         f.close()
 
         '''

@@ -77,8 +77,6 @@ app.controller("chat_controller", function($scope, $http) {
                 $scope.counters.push($scope.raw_query);
                 $scope.display_counters.push($scope.raw_query);
             }*/
-            $scope.counters.push($scope.raw_query);
-            $scope.display_counters.push($scope.raw_query);
             var config = {
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
@@ -94,6 +92,8 @@ app.controller("chat_controller", function($scope, $http) {
                     });*/
             $http.get(getUrl + encodeURI($scope.raw_query))
                 .then(function mySuccess(response) {
+                    $scope.counters.push($scope.raw_query);
+                    $scope.display_counters.push($scope.raw_query);
                     console.log('Recieved...', response.data);
                     /*for(var counter in response.data) {
                         $scope.counters.push(response.data[counter]);
@@ -123,14 +123,11 @@ app.controller("chat_controller", function($scope, $http) {
         console.log('haha');
         getUrl = "http://localhost:5000/quick_info?query=";
         console.log($scope.raw_query);
-        $scope.counters_2.push($scope.raw_query);
         /*if (typeof $scope.raw_query == "string") {
             $scope.counters.pop();
             $scope.counters.push($scope.raw_query);
             $scope.display_counters_2.push($scope.raw_query);
         }*/
-        $scope.counters.push($scope.raw_query);
-        $scope.display_counters_2.push($scope.raw_query);
         var config = {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8;'
@@ -146,6 +143,8 @@ app.controller("chat_controller", function($scope, $http) {
                 });*/
         $http.get(getUrl + encodeURI($scope.raw_query))
             .then(function mySuccess(response) {
+                $scope.counters_2.push($scope.raw_query);
+                $scope.display_counters_2.push($scope.raw_query);
                 console.log('Recieved...', response.data);
                 /*for(var counter in response.data) {
                     $scope.counters_2.push(response.data[counter]);
@@ -156,9 +155,9 @@ app.controller("chat_controller", function($scope, $http) {
                     current_display: 0,
                     confidence: response.data.confidence
                 });
-                var temp = $scope.counters[$scope.counters.length-1].Google[$scope.counters[$scope.counters.length-1].Google.length-1].text.split('-ang-');//[$scope.counters.Google.length-1].split('-ang-');
+                var temp = $scope.counters_2[$scope.counters_2.length-1].Google[$scope.counters_2[$scope.counters_2.length-1].Google.length-1].text.split('-ang-');//[$scope.counters.Google.length-1].split('-ang-');
                 console.log('Haha temp: ', temp);
-                $scope.counters[$scope.counters.length-1].Google[$scope.counters[$scope.counters.length-1].Google.length-1].text = temp.join('<br />');
+                $scope.counters_2[$scope.counters_2.length-1].Google[$scope.counters_2[$scope.counters_2.length-1].Google.length-1].text = temp.join('<br />');
                 //for(var chat in $scope.counters_2) {
                 $scope.display_counters_2.push({
                     Google: $scope.counters_2[$scope.counters_2.length - 1].Google[$scope.counters_2[$scope.counters_2.length - 1].current_display],

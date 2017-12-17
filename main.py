@@ -58,16 +58,16 @@ class conversation_class:
         return False
 
     def resultFormer(self, google, twitter):
-        print '\nGoogle: ', google, '\nTwitter: ', twitter, '\nMined Data: ', self.mined_data
+        # print '\nGoogle: ', google, '\nTwitter: ', twitter, '\nMined Data: ', self.mined_data
         result_google = []
         for string in google:
             for data in self.mined_data['Google']:
-                if data['text']==string:
+                if data['text'].encode('utf-8')==string:
                     result_google.append({ 'url': plaintext(data['url']).encode('utf-8'), 'title': plaintext(data['title']).encode('utf-8'), 'text': plaintext(data['text']).encode('utf-8') })
         result_twitter = []
         for string in twitter:
             for data in self.mined_data['Twitter']:
-                if data['text']==string:
+                if data['text'].encode('utf-8')==string:
                     result_twitter.append({ 'url': plaintext(data['url']).encode('utf-8'), 'title': plaintext(data['title']).encode('utf-8'), 'text': plaintext(data['text']).encode('utf-8') })
 
         self.result = { 'Error': None, 'Google': result_google, 'Twitter': result_twitter }
@@ -104,7 +104,7 @@ def run_multiple(raw_query, change_sentiment=True, recursing=False):
         'Twitter': []
     }
     for sentence in raw_query:
-        mined_data = run(sentence, change_sentiment=change_sentiment, recursing=True, returnall=True)
+        mined_data, confidence = run(sentence, change_sentiment=change_sentiment, recursing=True, returnall=True)
         # print 'Within multi: ', counters
         try:
             if len(mined_data['Google'])>0 or not len(mined_data['Google'])==None:
@@ -225,9 +225,15 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
     
     conversation = conversation_class(raw_query)
     print 'Starting text analysis...\n'
-    search_query, isMeaning = TextAnalyser.queryGenerator(raw_query, change_sentiment)
+    if not change_sentiment:
+        isMeaning = False
+        search_query = str(raw_query)
+    else:
+        search_query, isMeaning = TextAnalyser.queryGenerator(raw_query, change_sentiment)
     # search_query, isMeaning = 'Modi bad minister', False
     search_query = str(search_query)
+    search_query = 'Automation is not good for the economy'
+    print '\nSearch query: ', search_query
     conversation.addSearchQuery(search_query)
 
     # If user doesn't ask for meaning ----------------------------------------------------------
@@ -235,6 +241,16 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
         # Mining information -------------------------------------------------------------------
         print 'Mining information off the web...\n'
         mined_data = data_mine.get_info(search_query)
+        fresh_mined_data = {'Google': [], 'Twitter': [], 'Error': None}
+        for fields in mined_data:
+            if not fields=='Error':
+                for data in mined_data[fields]:
+                    if not ''==data['text']:
+                        fresh_mined_data[fields].append(data)
+
+        fresh_mined_data['Error'] = mined_data['Error']
+        mined_data = fresh_mined_data
+        # print '\nMined Data line 246: ', mined_data
         if mined_data['Error']:
             print mined_data['Error']
             return None
@@ -305,35 +321,43 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
         google_text = [iterator['text'] for iterator in conversation.mined_data['Google']]
         twitter_text = [iterator['text'] for iterator in conversation.mined_data['Twitter']]
         similarity_threshold = {
-            'Google': 0.6,
-            'Twitter': 0.3
+            'Google': 0.7,
+            'Twitter': 0.5
         }
         try:
-            google_counters = get_relevant.get_array(google_text, conversation.user_argument, google_range, similarity_threshold['Google'])
+            google_counters, match_quality_google = get_relevant.get_array(google_text, conversation.user_argument, google_range, similarity_threshold['Google'])
         except (UnicodeDecodeError, UnicodeEncodeError):
             print '\nUnicode exception at google_counters(similarity) !, trying utf-8 encoding'
             def force_to_unicode(text):
                 return text if isinstance(text, unicode) else text.decode('utf8')
             google_text = [force_to_unicode(iterator) for iterator in google_text]
-            google_counters = get_relevant.get_array(google_text, conversation.user_argument, google_range, similarity_threshold['Google'])
+            google_counters, match_quality_google = get_relevant.get_array(google_text, conversation.user_argument, google_range, similarity_threshold['Google'])
         try:
-            twitter_counters = get_relevant.get_array(twitter_text, conversation.user_argument, twitter_range, similarity_threshold['Twitter'])
+            twitter_counters, match_quality_twitter  = get_relevant.get_array(twitter_text, conversation.user_argument, twitter_range, similarity_threshold['Twitter'])
         except (UnicodeDecodeError, UnicodeEncodeError):
             print '\nUnicode exception at twtter_counters(similarity) !, trying utf-8 encoding'
             def force_to_unicode(text):
                 return text if isinstance(text, unicode) else text.decode('utf8')
             twitter_text = [force_to_unicode(iterator) for iterator in twitter_text]
-            twitter_counters = get_relevant.get_array(twitter_text, conversation.user_argument, twitter_range, similarity_threshold['Twitter'])
+            twitter_counters, match_quality_twitter = get_relevant.get_array(twitter_text, conversation.user_argument, twitter_range, similarity_threshold['Twitter'])
         conversation.addCounters(google_counters)
         conversation.addTweets(twitter_counters)
+        if match_quality_google=='H':
+            confidence = 'high confidence'
+        elif match_quality_google=='M':
+            confidence = 'medium confidence'
+        elif match_quality_google=='L':
+            confidence = 'low confidence'
+        else:
+            confidence = 'You are probably right, the results may not be relevant!'
 
         conversation.counters = remove_duplicate(conversation.counters)
         google_counters = conversation.counters
 
         rerun = conversation.printCounters()
-        if rerun and not recursing:
-            print '\nRerunning as counters not up to the mark!'
-            return run(conversation.user_argument, change_sentiment=False, recursing=True)
+        # if rerun and not recursing:
+        #     print '\nRerunning as counters not up to the mark!'
+        #     return run(conversation.user_argument, change_sentiment=False, recursing=True)
             # return
 
         f = open('previous_results.json', 'w')
@@ -370,18 +394,21 @@ def run(raw_query, change_sentiment=True, recursing=False, returnall=False):
         '''
     else:
         print search_query
+        confidence = ''
+        return_result = {'Google': [{'url': '', 'text': search_query, 'title': 'Meaning of'.join(raw_query)}], 'Twitter': [], 'Error': None}
 
     print '\n\nDone:)'
 
     return_result = conversation.resultFormer(conversation.counters, conversation.tweets)
-    print '\nReturn Result: ', return_result
+    # print '\nReturn Result: ', return_result
 
     if returnall==False:
         if len(conversation.counters)<=3:
-            return return_result
+            return return_result, confidence
             # return {'Google': conversation.counters, 'Twitter': conversation.tweets, 'Error': None}
         else:
-            return return_result
+            return return_result, confidence
             # return {'Google': conversation.counters[0:3], 'Twitter': conversation.tweets, 'Error': None}
     else:
         return conversation.mined_data
+        
